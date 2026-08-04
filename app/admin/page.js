@@ -6,6 +6,12 @@ import RoofMapCanvas from '../../components/RoofMapCanvas';
 import { COLOR_TEXTURES, getShingleImage } from '../../data/shingleData';
 
 export default function AdminPage() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [loginError, setLoginError] = useState('');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [newAdminPassword, setNewAdminPassword] = useState('');
+
   const [leads, setLeads] = useState([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
@@ -26,9 +32,47 @@ export default function AdminPage() {
   const [aprRate, setAprRate] = useState(12.99);
 
   useEffect(() => {
-    fetchLeads();
-    fetchSettings();
+    const token = localStorage.getItem('adminAuthToken');
+    if (token) {
+      setIsAuthenticated(true);
+      fetchLeads();
+      fetchSettings();
+    }
   }, []);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoginError('');
+    setIsLoggingIn(true);
+
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: passwordInput })
+      });
+      const data = await res.json();
+
+      if (data.success && data.token) {
+        localStorage.setItem('adminAuthToken', data.token);
+        setIsAuthenticated(true);
+        setPasswordInput('');
+        fetchLeads();
+        fetchSettings();
+      } else {
+        setLoginError(data.error || 'Invalid admin password');
+      }
+    } catch (err) {
+      setLoginError('Error authenticating password.');
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('adminAuthToken');
+    setIsAuthenticated(false);
+  };
 
   const fetchLeads = async () => {
     try {
@@ -63,23 +107,30 @@ export default function AdminPage() {
 
   const handleSaveSettings = async () => {
     try {
+      const payload = {
+        apiKey,
+        silverPerSq: Number(priceSilver),
+        goldPerSq: Number(priceGold),
+        elitePerSq: Number(priceElite),
+        silverOhioAdj: Number(ohioSilver),
+        goldOhioAdj: Number(ohioGold),
+        eliteOhioAdj: Number(ohioElite),
+        aprRate: Number(aprRate)
+      };
+
+      if (newAdminPassword.trim()) {
+        payload.adminPassword = newAdminPassword.trim();
+      }
+
       const res = await fetch('/api/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          apiKey,
-          silverPerSq: Number(priceSilver),
-          goldPerSq: Number(priceGold),
-          elitePerSq: Number(priceElite),
-          silverOhioAdj: Number(ohioSilver),
-          goldOhioAdj: Number(ohioGold),
-          eliteOhioAdj: Number(ohioElite),
-          aprRate: Number(aprRate)
-        })
+        body: JSON.stringify(payload)
       });
       const data = await res.json();
       if (data.success) {
         alert('System settings & pricing updated successfully! Public calculator is automatically synced.');
+        setNewAdminPassword('');
         setSettingsOpen(false);
       }
     } catch (err) {
@@ -160,6 +211,93 @@ export default function AdminPage() {
     ? { lat: activeLead.mapCoordinates[0].lat, lng: activeLead.mapCoordinates[0].lng }
     : null;
 
+  if (!isAuthenticated) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        background: '#0f172a',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '20px',
+        fontFamily: "'Plus Jakarta Sans', sans-serif"
+      }}>
+        <div style={{
+          background: '#ffffff',
+          borderRadius: '20px',
+          padding: '40px',
+          maxWidth: '440px',
+          width: '100%',
+          boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)'
+        }}>
+          <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+            <div style={{
+              width: '60px',
+              height: '60px',
+              background: '#fef2f2',
+              borderRadius: '16px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '1.8rem',
+              margin: '0 auto 16px',
+              border: '1px solid #fee2e2'
+            }}>
+              🔒
+            </div>
+            <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0f172a', margin: '0 0 6px' }}>
+              Admin Panel Access
+            </h1>
+            <p style={{ fontSize: '0.9rem', color: '#64748b', margin: 0 }}>
+              Enter password to unlock CRM lead management &amp; system settings.
+            </p>
+          </div>
+
+          <form onSubmit={handleLogin}>
+            <div className="form-group" style={{ marginBottom: '20px' }}>
+              <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>
+                ADMIN PASSWORD
+              </label>
+              <input
+                type="password"
+                className="form-input"
+                style={{
+                  height: '48px',
+                  fontSize: '1rem',
+                  border: loginError ? '2px solid #d32f2f' : '1px solid #cbd5e1'
+                }}
+                value={passwordInput}
+                onChange={e => { setPasswordInput(e.target.value); setLoginError(''); }}
+                placeholder="Enter password (default: admin)"
+                autoFocus
+              />
+              {loginError && (
+                <span style={{ color: '#d32f2f', fontSize: '0.82rem', marginTop: '6px', fontWeight: 600, display: 'block' }}>
+                  ⚠️ {loginError}
+                </span>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              className="btn-primary-lg"
+              disabled={isLoggingIn}
+              style={{ width: '100%', height: '48px', fontSize: '1rem', fontWeight: 700 }}
+            >
+              {isLoggingIn ? 'Authenticating...' : 'Unlock Admin Panel \u2192'}
+            </button>
+          </form>
+
+          <div style={{ textAlign: 'center', marginTop: '24px', paddingTop: '20px', borderTop: '1px solid #e2e8f0' }}>
+            <Link href="/" style={{ color: 'var(--primary-red)', fontSize: '0.88rem', fontWeight: 600, textDecoration: 'none' }}>
+              &larr; Return to Customer Roof Estimator
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="app-wrapper">
       {/* Top Header Bar */}
@@ -172,12 +310,15 @@ export default function AdminPage() {
               <div className="brand-sub">CRM &amp; Lead Management Dashboard</div>
             </div>
           </Link>
-          <div className="header-contact-info">
+          <div className="header-contact-info" style={{ display: 'flex', gap: '10px' }}>
             <button className="btn-secondary" style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.25)' }} onClick={() => setSettingsOpen(true)}>
               ⚙️ Settings &amp; API Key
             </button>
+            <button className="btn-secondary" style={{ background: 'rgba(239,68,68,0.2)', color: '#fca5a5', border: '1px solid rgba(239,68,68,0.4)' }} onClick={handleLogout}>
+              🔒 Logout
+            </button>
             <Link href="/" className="btn-admin-nav">
-              &larr; Customer Estimator
+              &larr; Estimator
             </Link>
           </div>
         </div>
@@ -511,7 +652,7 @@ export default function AdminPage() {
             </div>
 
             <div className="form-section-head">3. Financing Interest Rate (% APR)</div>
-            <div className="form-group" style={{ marginBottom: '24px' }}>
+            <div className="form-group" style={{ marginBottom: '20px' }}>
               <label className="form-label">GoodLeap Financing APR (%)</label>
               <input
                 type="number"
@@ -519,6 +660,18 @@ export default function AdminPage() {
                 className="form-input"
                 value={aprRate}
                 onChange={e => setAprRate(e.target.value)}
+              />
+            </div>
+
+            <div className="form-section-head">4. Security &amp; Admin Password</div>
+            <div className="form-group" style={{ marginBottom: '24px' }}>
+              <label className="form-label">New Admin Password (leave blank to keep current)</label>
+              <input
+                type="password"
+                className="form-input"
+                value={newAdminPassword}
+                onChange={e => setNewAdminPassword(e.target.value)}
+                placeholder="Enter new admin password..."
               />
             </div>
 

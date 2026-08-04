@@ -7,6 +7,7 @@ const SETTINGS_FILE = path.join(DATA_DIR, 'settings.json');
 
 const DEFAULT_SETTINGS = {
   apiKey: process.env.GOOGLE_MAPS_API_KEY || 'AIzaSyDbQLFiIpLz8w3ZXYaC7BKA7YlUiBCFzPA',
+  adminPassword: process.env.ADMIN_PASSWORD || 'admin',
   silverPerSq: 525,
   goldPerSq: 575,
   elitePerSq: 650,
