@@ -5,6 +5,12 @@ export const metadata = {
   description: 'Estimate roof size using Google Maps satellite view and calculate instant replacement costs.',
 };
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1
+};
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
