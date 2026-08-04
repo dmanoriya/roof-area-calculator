@@ -56,7 +56,8 @@ function writeSettings(data) {
 
 export async function GET() {
   const settings = readSettings();
-  return NextResponse.json({ success: true, settings });
+  const { adminPassword, ...safeSettings } = settings;
+  return NextResponse.json({ success: true, settings: safeSettings });
 }
 
 export async function POST(req) {

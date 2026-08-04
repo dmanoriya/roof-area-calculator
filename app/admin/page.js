@@ -12,6 +12,11 @@ export default function AdminPage() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [newAdminPassword, setNewAdminPassword] = useState('');
 
+  const [isApiKeyUnlocked, setIsApiKeyUnlocked] = useState(false);
+  const [superModalOpen, setSuperModalOpen] = useState(false);
+  const [superPasswordInput, setSuperPasswordInput] = useState('');
+  const [superError, setSuperError] = useState('');
+
   const [leads, setLeads] = useState([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
@@ -30,6 +35,32 @@ export default function AdminPage() {
   const [ohioGold, setOhioGold] = useState(50);
   const [ohioElite, setOhioElite] = useState(130);
   const [aprRate, setAprRate] = useState(12.99);
+
+  const handleVerifySuperAdmin = async (e) => {
+    e.preventDefault();
+    setSuperError('');
+
+    try {
+      const res = await fetch('/api/admin/verify-super', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: superPasswordInput })
+      });
+      const data = await res.json();
+
+      if (data.success && data.apiKey) {
+        setApiKey(data.apiKey);
+        setIsApiKeyUnlocked(true);
+        setSuperModalOpen(false);
+        setSuperPasswordInput('');
+        alert('Google Maps API Key unlocked successfully!');
+      } else {
+        setSuperError(data.error || 'Invalid Super Admin Password');
+      }
+    } catch (err) {
+      setSuperError('Verification error.');
+    }
+  };
 
   useEffect(() => {
     const token = localStorage.getItem('adminAuthToken');
@@ -108,7 +139,6 @@ export default function AdminPage() {
   const handleSaveSettings = async () => {
     try {
       const payload = {
-        apiKey,
         silverPerSq: Number(priceSilver),
         goldPerSq: Number(priceGold),
         elitePerSq: Number(priceElite),
@@ -117,6 +147,10 @@ export default function AdminPage() {
         eliteOhioAdj: Number(ohioElite),
         aprRate: Number(aprRate)
       };
+
+      if (isApiKeyUnlocked && apiKey) {
+        payload.apiKey = apiKey;
+      }
 
       if (newAdminPassword && typeof newAdminPassword === 'string' && newAdminPassword.trim()) {
         payload.adminPassword = newAdminPassword.trim();
@@ -579,16 +613,47 @@ export default function AdminPage() {
               ⚙️ Estimator System Settings
             </h2>
 
-            <div className="form-group">
-              <label className="form-label">Google Maps API Key</label>
+            <div className="form-group" style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #cbd5e1', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <label className="form-label" style={{ fontWeight: 800, margin: 0, color: '#0f172a' }}>
+                  🔒 Google Maps API Key (Super Admin Protected)
+                </label>
+                {!isApiKeyUnlocked ? (
+                  <button
+                    type="button"
+                    className="btn-secondary"
+                    style={{ fontSize: '0.78rem', padding: '6px 12px', background: '#0f172a', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 700 }}
+                    onClick={() => { setSuperModalOpen(true); setSuperError(''); setSuperPasswordInput(''); }}
+                  >
+                    🔑 Unlock / View Key
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="btn-secondary"
+                    style={{ fontSize: '0.78rem', padding: '6px 12px', background: '#16a34a', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 700 }}
+                    onClick={() => {
+                      navigator.clipboard.writeText(apiKey);
+                      alert('API Key copied to clipboard!');
+                    }}
+                  >
+                    📋 Copy Key
+                  </button>
+                )}
+              </div>
+
               <input
-                type="text"
+                type={isApiKeyUnlocked ? 'text' : 'password'}
                 className="form-input"
-                value={apiKey}
-                onChange={e => setApiKey(e.target.value)}
+                style={{ background: isApiKeyUnlocked ? '#ffffff' : '#f1f5f9', color: isApiKeyUnlocked ? '#0f172a' : '#64748b', cursor: isApiKeyUnlocked ? 'text' : 'not-allowed', fontWeight: isApiKeyUnlocked ? 600 : 800 }}
+                value={isApiKeyUnlocked ? apiKey : '••••••••••••••••••••••••••••••••••••'}
+                onChange={e => { if (isApiKeyUnlocked) setApiKey(e.target.value); }}
+                readOnly={!isApiKeyUnlocked}
               />
-              <span style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '4px', display: 'block' }}>
-                💡 <strong>Solar API Note:</strong> To enable AI Building Roof Polygons, ensure <code>solar.googleapis.com</code> (Solar API) is enabled for this API Key in Google Cloud Console.
+              <span style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '6px', display: 'block' }}>
+                {isApiKeyUnlocked
+                  ? '✅ Unlocked by Super Admin. You can view, copy, or update this API Key.'
+                  : '🔒 Protected: Requires Super Admin Master Password to view or copy.'}
               </span>
             </div>
 
@@ -681,6 +746,52 @@ export default function AdminPage() {
             <button className="btn-primary-lg" style={{ marginTop: '10px' }} onClick={handleSaveSettings}>
               Save Settings &amp; Sync Pricing
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Super Admin API Key Protection Modal */}
+      {superModalOpen && (
+        <div className="modal-backdrop" onClick={() => setSuperModalOpen(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '420px', borderRadius: '20px', padding: '32px' }}>
+            <button className="modal-close" onClick={() => setSuperModalOpen(false)}>&times;</button>
+            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+              <div style={{ width: '56px', height: '56px', background: '#fef2f2', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.6rem', margin: '0 auto 12px', border: '1px solid #fee2e2' }}>
+                🔑
+              </div>
+              <h2 style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--primary-red)', marginBottom: '6px', fontWeight: 800, fontSize: '1.35rem' }}>
+                Super Admin Authorization
+              </h2>
+              <p style={{ fontSize: '0.86rem', color: '#64748b', margin: 0 }}>
+                Enter Super Admin Master Password to unlock, view, or copy the Google Maps API Key.
+              </p>
+            </div>
+
+            <form onSubmit={handleVerifySuperAdmin}>
+              <div className="form-group" style={{ marginBottom: '20px' }}>
+                <label className="form-label" style={{ fontWeight: 700, fontSize: '0.82rem' }}>
+                  SUPER ADMIN MASTER PASSWORD
+                </label>
+                <input
+                  type="password"
+                  className="form-input"
+                  style={{ height: '46px', fontSize: '1rem', border: superError ? '2px solid #d32f2f' : '1px solid #cbd5e1' }}
+                  value={superPasswordInput}
+                  onChange={e => { setSuperPasswordInput(e.target.value); setSuperError(''); }}
+                  placeholder="Enter master password..."
+                  autoFocus
+                />
+                {superError && (
+                  <span style={{ color: '#d32f2f', fontSize: '0.82rem', marginTop: '6px', fontWeight: 600, display: 'block' }}>
+                    ⚠️ {superError}
+                  </span>
+                )}
+              </div>
+
+              <button type="submit" className="btn-primary-lg" style={{ width: '100%', height: '46px', fontSize: '0.95rem', fontWeight: 700 }}>
+                Verify &amp; Unlock Key &rarr;
+              </button>
+            </form>
           </div>
         </div>
       )}
