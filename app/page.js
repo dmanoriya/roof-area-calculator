@@ -304,9 +304,11 @@ export default function Home() {
   const handleProceedToMap = () => {
     if (!validateStep()) return;
 
-    if (!selectedLocation && propertyAddress && window.google?.maps?.Geocoder) {
+    const fullAddr = `${propertyAddress}${city ? `, ${city}` : ''}, ${state} ${zip || ''}`.trim();
+
+    if (window.google?.maps?.Geocoder) {
       const geocoder = new window.google.maps.Geocoder();
-      geocoder.geocode({ address: propertyAddress, componentRestrictions: { country: 'US' } }, (results, status) => {
+      geocoder.geocode({ address: fullAddr, componentRestrictions: { country: 'US' } }, (results, status) => {
         if (status === 'OK' && results[0]?.geometry?.location) {
           const loc = {
             lat: results[0].geometry.location.lat(),
@@ -663,6 +665,7 @@ export default function Home() {
                 <RoofMapCanvas
                   apiKey={apiKey}
                   selectedLocation={selectedLocation}
+                  isVisible={currentStep === 1}
                   propertyAddress={propertyAddress}
                   mode={mode}
                   pitch={pitch}

@@ -1,17 +1,28 @@
 {
-  "apiKey": "AIzaSyDbQLFiIpLz8w3ZXYaC7BKA7YlUiBCFzPA",
+  "apiKey": "AIzaSyAusNwdN9zPqXJ_doW_M4mbdrhtJkZkdpU",
+  "adminPassword": "admin",
+  "silverPerSq": 525,
+  "goldPerSq": 575,
+  "elitePerSq": 650,
+  "silverOhioAdj": 50,
+  "goldOhioAdj": 50,
+  "eliteOhioAdj": 130,
+  "aprRate": 12.99,
   "pricing": {
     "Silver": {
       "name": "Silver Package",
-      "targetPerSq": 525
+      "targetPerSq": 525,
+      "ohioAdjustment": 50
     },
     "Gold": {
       "name": "Gold Package",
-      "targetPerSq": 575
+      "targetPerSq": 575,
+      "ohioAdjustment": 50
     },
     "Elite": {
       "name": "IHR Elite",
-      "targetPerSq": 650
+      "targetPerSq": 650,
+      "ohioAdjustment": 130
     }
   },
   "pitchMultipliers": {

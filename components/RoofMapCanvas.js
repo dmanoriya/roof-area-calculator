@@ -7,6 +7,7 @@ export default function RoofMapCanvas({
   selectedLocation,
   initialCoordinates = null,
   readOnly = false,
+  isVisible = true,
   propertyAddress,
   mode,
   pitch,
@@ -274,6 +275,28 @@ export default function RoofMapCanvas({
     createAutoPolygon(loc);
     fetchSolarRoofInsights(lat, lng);
   }, [selectedLocation, initialCoordinates, createAutoPolygon, fetchSolarRoofInsights]);
+
+  // Trigger map resize & zoom to building level when Step 1 becomes visible
+  useEffect(() => {
+    if (!isVisible || !mapInstanceRef.current || !window.google?.maps) return;
+
+    const timer = setTimeout(() => {
+      if (mapInstanceRef.current) {
+        window.google.maps.event.trigger(mapInstanceRef.current, 'resize');
+
+        const targetLoc = selectedLocation || currentCenterRef.current;
+        if (targetLoc) {
+          const lat = typeof targetLoc.lat === 'function' ? targetLoc.lat() : targetLoc.lat;
+          const lng = typeof targetLoc.lng === 'function' ? targetLoc.lng() : targetLoc.lng;
+          const loc = { lat, lng };
+          mapInstanceRef.current.setCenter(loc);
+          mapInstanceRef.current.setZoom(20);
+        }
+      }
+    }, 150);
+
+    return () => clearTimeout(timer);
+  }, [isVisible, selectedLocation]);
 
   const clearShape = () => {
     if (readOnly) return;
