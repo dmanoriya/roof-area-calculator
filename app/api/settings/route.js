@@ -63,13 +63,39 @@ export async function POST(req) {
   try {
     const body = await req.json();
     const currentSettings = readSettings();
+
+    const silverPerSq = Number(body.silverPerSq ?? currentSettings.silverPerSq ?? 525);
+    const goldPerSq = Number(body.goldPerSq ?? currentSettings.goldPerSq ?? 575);
+    const elitePerSq = Number(body.elitePerSq ?? currentSettings.elitePerSq ?? 650);
+
+    const silverOhioAdj = Number(body.silverOhioAdj ?? currentSettings.silverOhioAdj ?? 50);
+    const goldOhioAdj = Number(body.goldOhioAdj ?? currentSettings.goldOhioAdj ?? 50);
+    const eliteOhioAdj = Number(body.eliteOhioAdj ?? currentSettings.eliteOhioAdj ?? 130);
+
     const updatedSettings = {
       ...currentSettings,
-      ...body
+      ...body,
+      silverPerSq,
+      goldPerSq,
+      elitePerSq,
+      silverOhioAdj,
+      goldOhioAdj,
+      eliteOhioAdj,
+      pricing: {
+        Silver: { name: 'Silver Package', targetPerSq: silverPerSq, ohioAdjustment: silverOhioAdj },
+        Gold: { name: 'Gold Package', targetPerSq: goldPerSq, ohioAdjustment: goldOhioAdj },
+        Elite: { name: 'IHR Elite', targetPerSq: elitePerSq, ohioAdjustment: eliteOhioAdj }
+      }
     };
-    writeSettings(updatedSettings);
+
+    const success = writeSettings(updatedSettings);
+    if (!success) {
+      return NextResponse.json({ success: false, error: 'Failed to write settings file' }, { status: 500 });
+    }
+
     return NextResponse.json({ success: true, settings: updatedSettings });
   } catch (err) {
-    return NextResponse.json({ success: false, error: 'Failed to update settings' }, { status: 500 });
+    console.error('Error saving settings:', err);
+    return NextResponse.json({ success: false, error: err.message || 'Failed to update settings' }, { status: 500 });
   }
 }

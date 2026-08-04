@@ -118,7 +118,7 @@ export default function AdminPage() {
         aprRate: Number(aprRate)
       };
 
-      if (newAdminPassword.trim()) {
+      if (newAdminPassword && typeof newAdminPassword === 'string' && newAdminPassword.trim()) {
         payload.adminPassword = newAdminPassword.trim();
       }
 
@@ -129,12 +129,15 @@ export default function AdminPage() {
       });
       const data = await res.json();
       if (data.success) {
-        alert('System settings & pricing updated successfully! Public calculator is automatically synced.');
+        alert('System settings & API key updated successfully! Public calculator is automatically synced.');
         setNewAdminPassword('');
         setSettingsOpen(false);
+        fetchSettings();
+      } else {
+        alert(`Error: ${data.error || 'Failed to save settings'}`);
       }
     } catch (err) {
-      alert('Error saving settings.');
+      alert(`Error saving settings: ${err.message || 'Server connection failed'}`);
     }
   };
 
