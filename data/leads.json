@@ -1,0 +1,358 @@
+[
+  {
+    "id": "lead-msebienxn5do",
+    "createdAt": "2026-08-04T07:09:36.573Z",
+    "status": "New Lead",
+    "notes": "cdcd",
+    "homeownerName": "gfsdfv",
+    "phone": "9999999999",
+    "email": "faf@gmail.com",
+    "propertyAddress": "408 E Chatham St, Cary, NC 27511, USA",
+    "city": "Cary",
+    "state": "NC",
+    "zip": "27511",
+    "squares": 25,
+    "waste": 12,
+    "pitch": "medium",
+    "adjSquares": 32.2,
+    "calculatedAreaSqFt": 2477,
+    "selectedPackage": "Elite",
+    "shingleColor": "Coastal Granite",
+    "prefDate": "2026-08-18",
+    "backupDate": "",
+    "paymentMethod": "15yr",
+    "totalAmount": 20930,
+    "monthlyPayment": 264.68,
+    "signature": "cdc",
+    "mapCoordinates": [
+      {
+        "lat": 35.78867962144268,
+        "lng": -78.77316940613423
+      },
+      {
+        "lat": 35.78876066818721,
+        "lng": -78.7730850908247
+      },
+      {
+        "lat": 35.78864782411531,
+        "lng": -78.77292616994056
+      },
+      {
+        "lat": 35.78856296968311,
+        "lng": -78.77301249690686
+      }
+    ],
+    "updatedAt": "2026-08-04T07:10:05.185Z"
+  },
+  {
+    "id": "lead-mseb7g4a0ql0",
+    "createdAt": "2026-08-04T07:01:05.242Z",
+    "status": "New Lead",
+    "notes": "",
+    "homeownerName": "cdaac",
+    "phone": "9888989898",
+    "email": "ufg@gmail.com",
+    "propertyAddress": "408 E Chatham St, Cary, NC 27511, USA",
+    "city": "Cary",
+    "state": "NC",
+    "zip": "27511",
+    "squares": 25,
+    "waste": 12,
+    "pitch": "medium",
+    "adjSquares": 32.2,
+    "calculatedAreaSqFt": 2523,
+    "selectedPackage": "Elite",
+    "shingleColor": "Weathered Wood",
+    "prefDate": "2026-08-18",
+    "backupDate": "",
+    "paymentMethod": "15yr",
+    "totalAmount": 20930,
+    "monthlyPayment": 264.68,
+    "signature": "ddd",
+    "mapCoordinates": [
+      {
+        "lat": 35.78867798962821,
+        "lng": -78.77317007668648
+      },
+      {
+        "lat": 35.78876284393759,
+        "lng": -78.77307972640666
+      },
+      {
+        "lat": 35.7886483680537,
+        "lng": -78.77292482883605
+      },
+      {
+        "lat": 35.78856460149997,
+        "lng": -78.77301249690686
+      }
+    ]
+  },
+  {
+    "id": "lead-mseah1y9y0gj",
+    "createdAt": "2026-08-04T06:40:33.825Z",
+    "status": "New Lead",
+    "notes": "",
+    "homeownerName": "fadf",
+    "phone": "9889898989",
+    "email": "fdaedcw@gmail.com",
+    "propertyAddress": "226 E Cedar St, Cary, NC 27511, USA",
+    "city": "Cary",
+    "state": "NC",
+    "zip": "27511",
+    "squares": 42,
+    "waste": 12,
+    "pitch": "medium",
+    "adjSquares": 54.1,
+    "calculatedAreaSqFt": 4189,
+    "selectedPackage": "Gold",
+    "shingleColor": "Tan Mist",
+    "prefDate": "2026-08-18",
+    "backupDate": "",
+    "paymentMethod": "15yr",
+    "totalAmount": 31108,
+    "monthlyPayment": 393,
+    "signature": "cdca",
+    "mapCoordinates": [
+      {
+        "lat": 35.788891111957255,
+        "lng": -78.77653889140167
+      },
+      {
+        "lat": 35.788888936210384,
+        "lng": -78.77639959080733
+      },
+      {
+        "lat": 35.788615630336025,
+        "lng": -78.77640629632987
+      },
+      {
+        "lat": 35.78861671821315,
+        "lng": -78.77654962023773
+      }
+    ]
+  },
+  {
+    "id": "lead-mseabfozy1l6",
+    "createdAt": "2026-08-04T06:36:11.699Z",
+    "status": "New Lead",
+    "notes": "",
+    "homeownerName": "fasdsc",
+    "phone": "9889898989",
+    "email": "sacds@gmail.com",
+    "propertyAddress": "226 E Cedar St, Cary, NC 27511, USA",
+    "city": "Cary",
+    "state": "NC",
+    "zip": "27511",
+    "squares": 43,
+    "waste": 12,
+    "pitch": "medium",
+    "adjSquares": 55.4,
+    "calculatedAreaSqFt": 4317,
+    "selectedPackage": "Gold",
+    "shingleColor": "Weathered Wood",
+    "prefDate": "2026-08-18",
+    "backupDate": "",
+    "paymentMethod": "15yr",
+    "totalAmount": 31855,
+    "monthlyPayment": 403,
+    "signature": "faef",
+    "mapCoordinates": [
+      {
+        "lat": 35.78889219983067,
+        "lng": -78.7765429147152
+      },
+      {
+        "lat": 35.78889219983067,
+        "lng": -78.77639959080733
+      },
+      {
+        "lat": 35.78861671821315,
+        "lng": -78.77640361412085
+      },
+      {
+        "lat": 35.788613454581565,
+        "lng": -78.77654827913322
+      }
+    ]
+  },
+  {
+    "id": "lead-mse9yiupxzvq",
+    "createdAt": "2026-08-04T06:26:09.265Z",
+    "status": "New Lead",
+    "notes": "",
+    "homeownerName": "divyanshu",
+    "phone": "9887766556",
+    "email": "div@gmail.com",
+    "propertyAddress": "226 E Cedar St, Cary, NC 27511, USA",
+    "city": "Cary",
+    "state": "NC",
+    "zip": "27511",
+    "squares": 42,
+    "waste": 12,
+    "pitch": "medium",
+    "adjSquares": 54.1,
+    "calculatedAreaSqFt": 4228,
+    "selectedPackage": "Gold",
+    "shingleColor": "Weathered Wood",
+    "prefDate": "2026-08-18",
+    "backupDate": "",
+    "paymentMethod": "15yr",
+    "totalAmount": 31108,
+    "monthlyPayment": 393,
+    "signature": "divyanshu",
+    "mapCoordinates": [
+      {
+        "lat": 35.78889437557744,
+        "lng": -78.77654023250618
+      },
+      {
+        "lat": 35.78889274376738,
+        "lng": -78.7764029435686
+      },
+      {
+        "lat": 35.788614542458824,
+        "lng": -78.77640562577761
+      },
+      {
+        "lat": 35.788612910642925,
+        "lng": -78.77654760858097
+      }
+    ]
+  },
+  {
+    "id": "lead-mse9i86ugg7h",
+    "createdAt": "2026-08-04T06:13:28.950Z",
+    "status": "New Lead",
+    "notes": "",
+    "homeownerName": "faf",
+    "phone": "9889898989",
+    "email": "afs@gmail.com",
+    "propertyAddress": "841 US-1, Lugoff, SC 29078, USA",
+    "city": "Lugoff",
+    "state": "SC",
+    "zip": "29078",
+    "squares": 67,
+    "waste": 12,
+    "pitch": "medium",
+    "adjSquares": 86.3,
+    "calculatedAreaSqFt": 6698,
+    "selectedPackage": "Elite",
+    "shingleColor": "Pewter Gray",
+    "prefDate": "2026-08-18",
+    "backupDate": "",
+    "paymentMethod": "15yr",
+    "totalAmount": 56095,
+    "monthlyPayment": 709,
+    "signature": "fa",
+    "mapCoordinates": [
+      {
+        "lat": 34.22802137889673,
+        "lng": -80.67426306074792
+      },
+      {
+        "lat": 34.22816441819226,
+        "lng": -80.67402854173355
+      },
+      {
+        "lat": 34.227999860061914,
+        "lng": -80.6738756558197
+      },
+      {
+        "lat": 34.22785571165201,
+        "lng": -80.6741155392521
+      }
+    ]
+  },
+  {
+    "id": "lead-mse7hknb5qzb",
+    "createdAt": "2026-08-04T05:16:59.207Z",
+    "status": "New Lead",
+    "notes": "",
+    "homeownerName": "Robert Taylor",
+    "phone": "(919) 888-2345",
+    "email": "robert@example.com",
+    "propertyAddress": "789 Pine Ridge Rd",
+    "city": "Raleigh",
+    "state": "NC",
+    "zip": "27612",
+    "squares": 32,
+    "waste": 15,
+    "pitch": "high",
+    "adjSquares": 51.9,
+    "selectedPackage": "Gold",
+    "shingleColor": "Copper Canyon",
+    "paymentMethod": "15yr",
+    "totalAmount": 29842,
+    "monthlyPayment": 343.15,
+    "signature": "Robert Taylor"
+  },
+  {
+    "id": "lead-mse7d82rvodl",
+    "createdAt": "2026-08-04T05:13:36.291Z",
+    "status": "New Lead",
+    "notes": "",
+    "homeownerName": "Sarah Jenkins",
+    "phone": "(984) 555-0199",
+    "email": "sarah@example.com",
+    "propertyAddress": "450 Oak Avenue",
+    "city": "Raleigh",
+    "state": "NC",
+    "zip": "27607",
+    "squares": 28,
+    "waste": 12,
+    "pitch": "steep",
+    "adjSquares": 39.2,
+    "selectedPackage": "Elite",
+    "shingleColor": "Pewter Gray",
+    "paymentMethod": "10yr",
+    "totalAmount": 25480,
+    "monthlyPayment": 380.25,
+    "signature": "Sarah Jenkins"
+  },
+  {
+    "id": "lead-1001",
+    "createdAt": "2026-08-04T05:10:06.699Z",
+    "status": "New Lead",
+    "homeownerName": "John Smith",
+    "phone": "(555) 234-5678",
+    "email": "john.smith@example.com",
+    "propertyAddress": "123 Maple Street",
+    "city": "Raleigh",
+    "state": "NC",
+    "zip": "27601",
+    "squares": 30,
+    "waste": 12,
+    "pitch": "medium",
+    "pitchMultiplier": 1.15,
+    "calculatedAreaSqFt": 3000,
+    "adjSquares": 34.5,
+    "selectedPackage": "Gold",
+    "shingleColor": "Weathered Wood",
+    "prefDate": "2026-08-15",
+    "backupDate": "2026-08-20",
+    "paymentMethod": "15yr",
+    "totalAmount": 19837.5,
+    "monthlyPayment": 228.13,
+    "signature": "John Smith",
+    "mapCoordinates": [
+      {
+        "lat": 35.7796,
+        "lng": -78.6382
+      },
+      {
+        "lat": 35.7798,
+        "lng": -78.638
+      },
+      {
+        "lat": 35.7796,
+        "lng": -78.6378
+      },
+      {
+        "lat": 35.7794,
+        "lng": -78.638
+      }
+    ],
+    "notes": "Customer interested in financing option. Requested call after 2 PM."
+  }
+]

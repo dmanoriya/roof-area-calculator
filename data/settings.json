@@ -1,0 +1,24 @@
+{
+  "apiKey": "AIzaSyDbQLFiIpLz8w3ZXYaC7BKA7YlUiBCFzPA",
+  "pricing": {
+    "Silver": {
+      "name": "Silver Package",
+      "targetPerSq": 525
+    },
+    "Gold": {
+      "name": "Gold Package",
+      "targetPerSq": 575
+    },
+    "Elite": {
+      "name": "IHR Elite",
+      "targetPerSq": 650
+    }
+  },
+  "pitchMultipliers": {
+    "flat": 1,
+    "low": 1.05,
+    "medium": 1.15,
+    "steep": 1.25,
+    "high": 1.41
+  }
+}
