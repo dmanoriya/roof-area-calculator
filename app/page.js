@@ -812,7 +812,7 @@ export default function Home() {
                   1. SHINGLE COLOR — {selectedPackage === 'Silver' ? 'ATLAS PRO-LAM' : selectedPackage === 'Elite' ? 'ATLAS PINNACLE PRISTINE (IHR ELITE)' : 'ATLAS PINNACLE PRISTINE'}
                 </div>
 
-                <div className="swatch-grid-2col" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginBottom: '32px' }}>
+                <div className="swatch-grid-3col" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '32px' }}>
                   {getPackageColorList(selectedPackage).map(colorName => {
                     const texture = COLOR_TEXTURES[colorName] || { color: '#4a3c31', pattern: '' };
                     const imgSrc = getShingleImage(selectedPackage, colorName);

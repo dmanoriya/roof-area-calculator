@@ -826,10 +826,19 @@ body {
 
 /* Payment Methods & Term Pills */
 .pay-methods {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
     margin: 16px 0;
+}
+
+@media (max-width: 640px) {
+    .swatch-grid-3col {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+    .pay-methods {
+        grid-template-columns: 1fr;
+    }
 }
 
 .pay-card {
@@ -839,6 +848,9 @@ body {
     padding: 18px 20px;
     cursor: pointer;
     transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .pay-card:hover {
@@ -864,7 +876,7 @@ body {
     font-size: 0.82rem;
     color: #64748b;
     margin-top: 4px;
-    padding-left: 26px;
+    padding-left: 28px;
 }
 
 .term-pills-wrapper {
@@ -872,7 +884,8 @@ body {
     border: 1px solid #e2e8f0;
     border-radius: 12px;
     padding: 20px;
-    margin: 16px 0;
+    margin: 16px 0 24px;
+    width: 100%;
 }
 
 .term-grid {
