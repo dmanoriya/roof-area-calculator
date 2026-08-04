@@ -1010,7 +1010,7 @@ export default function Home() {
                   PAYMENT METHOD
                 </div>
 
-                <div className="pay-methods">
+                <div className="pay-methods" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginBottom: '20px' }}>
                   <div
                     className={`pay-card ${paymentMethod === 'full' ? 'selected' : ''}`}
                     onClick={() => setPaymentMethod('full')}
