@@ -41,11 +41,11 @@ body {
 
 /* Top Header Bar */
 .top-header {
-    background: #0f172a;
-    color: #ffffff;
+    background: #ffffff;
+    color: #0f172a;
     padding: 16px 32px;
     border-bottom: 3px solid var(--primary-red);
-    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
 }
 
 .header-container {
@@ -84,13 +84,13 @@ body {
     font-size: 1.35rem;
     font-weight: 800;
     letter-spacing: -0.02em;
-    color: #ffffff;
+    color: #0f172a;
     line-height: 1.1;
 }
 
 .brand-sub {
     font-size: 0.82rem;
-    color: #94a3b8;
+    color: #64748b;
     font-weight: 500;
 }
 
@@ -105,18 +105,18 @@ body {
     align-items: center;
     gap: 8px;
     font-size: 0.9rem;
-    font-weight: 600;
-    color: #f8fafc;
-    background: rgba(255,255,255,0.08);
+    font-weight: 700;
+    color: #0f172a;
+    background: #f1f5f9;
     padding: 8px 16px;
     border-radius: 30px;
-    border: 1px solid rgba(255,255,255,0.12);
+    border: 1px solid #cbd5e1;
 }
 
 .btn-admin-nav {
-    background: transparent;
-    color: #f8fafc;
-    border: 1px solid rgba(255,255,255,0.25);
+    background: #0f172a;
+    color: #ffffff;
+    border: 1px solid #0f172a;
     padding: 8px 18px;
     border-radius: 8px;
     font-size: 0.88rem;

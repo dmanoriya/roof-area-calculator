@@ -345,20 +345,17 @@ export default function AdminPage() {
               src="/logo.png"
               alt="Iron Horse Roofing"
               style={{
-                height: '48px',
-                width: '48px',
-                objectFit: 'contain',
-                borderRadius: '50%',
-                boxShadow: '0 2px 10px rgba(0,0,0,0.25)',
-                border: '2px solid rgba(255,255,255,0.2)'
+                height: '52px',
+                width: 'auto',
+                objectFit: 'contain'
               }}
             />
           </Link>
           <div className="header-contact-info" style={{ display: 'flex', gap: '10px' }}>
-            <button className="btn-secondary" style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.25)' }} onClick={() => setSettingsOpen(true)}>
+            <button className="btn-secondary" style={{ background: '#f1f5f9', color: '#0f172a', border: '1px solid #cbd5e1', fontWeight: 600 }} onClick={() => setSettingsOpen(true)}>
               ⚙️ Settings &amp; API Key
             </button>
-            <button className="btn-secondary" style={{ background: 'rgba(239,68,68,0.2)', color: '#fca5a5', border: '1px solid rgba(239,68,68,0.4)' }} onClick={handleLogout}>
+            <button className="btn-secondary" style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #fca5a5', fontWeight: 600 }} onClick={handleLogout}>
               🔒 Logout
             </button>
             <Link href="/" className="btn-admin-nav">

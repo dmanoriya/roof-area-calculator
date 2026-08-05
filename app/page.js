@@ -400,12 +400,9 @@ export default function Home() {
               src="/logo.png"
               alt="Iron Horse Roofing"
               style={{
-                height: '48px',
-                width: '48px',
-                objectFit: 'contain',
-                borderRadius: '50%',
-                boxShadow: '0 2px 10px rgba(0,0,0,0.25)',
-                border: '2px solid rgba(255,255,255,0.2)'
+                height: '52px',
+                width: 'auto',
+                objectFit: 'contain'
               }}
             />
           </Link>
