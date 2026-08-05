@@ -395,25 +395,19 @@ export default function Home() {
       {/* Header Bar */}
       <header className="top-header">
         <div className="header-container">
-          <Link href="/" className="brand-badge" style={{ textDecoration: 'none' }}>
-            <div style={{
-              background: '#ffffff',
-              padding: '6px 14px',
-              borderRadius: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.12)'
-            }}>
-              <img
-                src="/logo.png"
-                alt="Iron Horse Roofing"
-                style={{
-                  height: '42px',
-                  width: 'auto',
-                  objectFit: 'contain'
-                }}
-              />
-            </div>
+          <Link href="/" className="brand-badge" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
+            <img
+              src="/logo.png"
+              alt="Iron Horse Roofing"
+              style={{
+                height: '48px',
+                width: '48px',
+                objectFit: 'contain',
+                borderRadius: '50%',
+                boxShadow: '0 2px 10px rgba(0,0,0,0.25)',
+                border: '2px solid rgba(255,255,255,0.2)'
+              }}
+            />
           </Link>
           <div className="header-contact-info">
             <div className="header-phone">
