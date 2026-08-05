@@ -340,11 +340,24 @@ export default function AdminPage() {
       {/* Top Header Bar */}
       <header className="top-header">
         <div className="header-container">
-          <Link href="/" className="brand-badge">
-            <div className="brand-icon">IHR</div>
-            <div>
-              <div className="brand-name">IRON HORSE ROOFING</div>
-              <div className="brand-sub">CRM &amp; Lead Management Dashboard</div>
+          <Link href="/" className="brand-badge" style={{ textDecoration: 'none' }}>
+            <div style={{
+              background: '#ffffff',
+              padding: '6px 14px',
+              borderRadius: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.12)'
+            }}>
+              <img
+                src="/logo.png"
+                alt="Iron Horse Roofing"
+                style={{
+                  height: '42px',
+                  width: 'auto',
+                  objectFit: 'contain'
+                }}
+              />
             </div>
           </Link>
           <div className="header-contact-info" style={{ display: 'flex', gap: '10px' }}>
