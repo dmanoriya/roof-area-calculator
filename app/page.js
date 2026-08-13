@@ -1033,9 +1033,13 @@ export default function Home() {
                         height: '18px',
                         borderRadius: '50%',
                         border: paymentMethod === 'full' ? '6px solid var(--primary-red)' : '2px solid #cbd5e1',
-                        display: 'inline-block'
+                        display: 'inline-block',
+                        flexShrink: 0
                       }} />
-                      Pay in Full
+                      CC, ACH or Apple Pay
+                    </div>
+                    <div className="pc-sub">
+                      50% Deposit
                     </div>
                   </div>
 
@@ -1107,7 +1111,7 @@ export default function Home() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                     <span style={{ color: '#64748b' }}>Payment Method</span>
                     <strong>
-                      {paymentMethod === 'full' ? 'Pay in Full' : `${paymentMethod.replace('yr', ' Year')} Finance ($${calculateMonthly(calculateTotal(selectedPackage), paymentMethod === '5yr' ? 60 : paymentMethod === '10yr' ? 120 : 180)}/mo)`}
+                      {paymentMethod === 'full' ? 'CC, ACH or Apple Pay (50% Deposit)' : `${paymentMethod.replace('yr', ' Year')} Finance ($${calculateMonthly(calculateTotal(selectedPackage), paymentMethod === '5yr' ? 60 : paymentMethod === '10yr' ? 120 : 180)}/mo)`}
                     </strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.25rem', color: 'var(--primary-red)', paddingTop: '12px', borderTop: '1px solid #cbd5e1' }}>
