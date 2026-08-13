@@ -1152,9 +1152,6 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
                       {paymentMethod === 'full' ? 'CC, ACH or Apple Pay (50% Deposit)' : `${paymentMethod.replace('yr', ' Year')} Finance ($${calculateMonthly(calculateTotal(selectedPackage), paymentMethod === '5yr' ? 60 : paymentMethod === '10yr' ? 120 : 180)}/mo)`}
                     </strong>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.25rem', color: 'var(--primary-red)', paddingTop: '12px', borderTop: '1px solid #cbd5e1' }}>
-                    <span>Total Contract Price</span> <strong>${calculateTotal(selectedPackage).toLocaleString()}.00</strong>
-                  </div>
                 </div>
 
                 {/* INLINE CONSENT CHECKBOX ALIGNMENT & TERMS MODAL TRIGGER */}
