@@ -826,7 +826,7 @@ export default function Home() {
                 {state === 'OH' && selectedPackage === 'Elite' && (
                   <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '10px', padding: '12px 16px', marginBottom: '20px', fontSize: '0.86rem', color: '#991b1b', lineHeight: 1.5 }}>
                     <strong>Atlas Pinnacle Impact® Class 4 Impact Resistant Shingles</strong><br />
-                    Available in the 5 colors below for Ohio.
+                    Available in the colors below.
                   </div>
                 )}
 
