@@ -744,6 +744,7 @@ export default function Home() {
                             </div>
                             <div className="pkg-price-col">
                               <div className="pkg-price">As low as ${m15}/mo</div>
+                              <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#64748b', marginTop: '2px' }}>(15-yr finance)</div>
                               <div className="pkg-permo">Total: ${tot.toLocaleString()}.00</div>
                             </div>
                           </div>
