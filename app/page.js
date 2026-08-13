@@ -684,30 +684,18 @@ export default function Home() {
                   onCoordinatesChange={setMapCoords}
                 />
 
-                {/* Pitch & Waste Controls */}
-                <div className="form-section-head" style={{ marginTop: '20px' }}>Roof Pitch &amp; Waste Factor</div>
-                <div className="form-grid-2">
-                  <div className="form-group">
-                    <label className="form-label">Roof Slope / Pitch *</label>
-                    <select className="form-select" value={pitch} onChange={e => setPitch(e.target.value)}>
-                      <option value="flat">FLAT (Commercial/Flat)</option>
-                      <option value="low">LOW (Slight Slope)</option>
-                      <option value="medium">MEDIUM (Standard Residential)</option>
-                      <option value="steep">STEEP (Steep Incline)</option>
-                      <option value="high">HIGH (A-Frame/Victorian)</option>
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Waste Factor (%)</label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      value={waste}
-                      disabled
-                      readOnly
-                      style={{ backgroundColor: '#f1f5f9', cursor: 'not-allowed', color: '#64748b' }}
-                    />
-                  </div>
+                {/* Waste Factor Control */}
+                <div className="form-section-head" style={{ marginTop: '20px' }}>Waste Factor</div>
+                <div className="form-group" style={{ marginBottom: '24px' }}>
+                  <label className="form-label">Waste Factor (%)</label>
+                  <input
+                    type="number"
+                    className="form-input"
+                    value={waste}
+                    disabled
+                    readOnly
+                    style={{ backgroundColor: '#f1f5f9', cursor: 'not-allowed', color: '#64748b', maxWidth: '300px' }}
+                  />
                 </div>
 
                 <button className="btn-primary-lg" onClick={() => goToNextStep(2)}>
