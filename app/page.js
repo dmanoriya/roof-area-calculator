@@ -53,6 +53,13 @@ export default function Home() {
     aprRate: 12.99
   });
 
+  useEffect(() => {
+    const validColors = getPackageColorList(selectedPackage, state);
+    if (!validColors.includes(shingleColor)) {
+      setShingleColor(validColors[0] || 'Weathered Wood');
+    }
+  }, [selectedPackage, state, shingleColor]);
+
   const formatPhoneNumber = (value) => {
     const digits = (value || '').replace(/\D/g, '').slice(0, 10);
     if (digits.length <= 3) return digits;
@@ -812,14 +819,21 @@ export default function Home() {
                   <p className="step-description">Only the choices needed to build your roof.</p>
                 </div>
 
-                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '16px' }}>
-                  1. SHINGLE COLOR — {selectedPackage === 'Silver' ? 'ATLAS PRO-LAM' : selectedPackage === 'Elite' ? 'ATLAS PINNACLE PRISTINE (IHR ELITE)' : 'ATLAS PINNACLE PRISTINE'}
+                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>
+                  1. SHINGLE COLOR — {selectedPackage === 'Silver' ? 'ATLAS PRO-LAM (SILVER PACKAGE)' : (state === 'OH' && selectedPackage === 'Elite') ? 'ATLAS PINNACLE IMPACT (ELITE IMPACT PACKAGE)' : selectedPackage === 'Elite' ? 'ATLAS PINNACLE PRISTINE (IHR ELITE)' : 'ATLAS PINNACLE PRISTINE'}
                 </div>
 
+                {state === 'OH' && selectedPackage === 'Elite' && (
+                  <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '10px', padding: '12px 16px', marginBottom: '20px', fontSize: '0.86rem', color: '#991b1b', lineHeight: 1.5 }}>
+                    <strong>Atlas Pinnacle Impact® Class 4 Impact Resistant Shingles</strong><br />
+                    Available in the 5 colors below for Ohio.
+                  </div>
+                )}
+
                 <div className="swatch-grid-3col" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '32px' }}>
-                  {getPackageColorList(selectedPackage).map(colorName => {
+                  {getPackageColorList(selectedPackage, state).map(colorName => {
                     const texture = COLOR_TEXTURES[colorName] || { color: '#4a3c31', pattern: '' };
-                    const imgSrc = getShingleImage(selectedPackage, colorName);
+                    const imgSrc = getShingleImage(selectedPackage, colorName, state);
                     const isSelected = shingleColor === colorName;
                     return (
                       <div

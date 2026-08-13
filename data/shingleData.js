@@ -37,21 +37,23 @@ export const COLOR_TEXTURES = {
   "Hickory": { color: "#4f3724", pattern: "repeating-linear-gradient(45deg, #362416, #362416 12px, #4f3724 12px, #4f3724 24px)" }
 };
 
-export function getPackageColorList(tier) {
+export function getPackageColorList(tier, state) {
   if (tier === 'Silver') return PROLAM_COLORS;
-  // Both Gold and Elite use Pinnacle Pristine colors (16 colors)
+  if (tier === 'Elite' && state === 'OH') return IMPACT_COLORS;
   return PINNACLE_COLORS;
 }
 
-export function getPackageShingleName(tier) {
+export function getPackageShingleName(tier, state) {
   if (tier === 'Silver') return 'Atlas Pro-Lam Architectural Shingles';
+  if (tier === 'Elite' && state === 'OH') return 'Atlas Pinnacle Impact Class 4 Impact Resistant Shingles';
   if (tier === 'Elite') return 'Atlas Pinnacle Pristine (IHR ELITE)';
   return 'Atlas Pinnacle Pristine Shingles';
 }
 
-export function getShingleImage(tier, colorName) {
+export function getShingleImage(tier, colorName, state) {
   let prefix = 'Pinnacle';
   if (tier === 'Silver') prefix = 'ProLam';
+  if (tier === 'Elite' && state === 'OH') prefix = 'Impact';
   const key = `${prefix}|${colorName}`;
-  return SHINGLE_IMAGES[key] || SHINGLE_IMAGES[`Pinnacle|${colorName}`] || null;
+  return SHINGLE_IMAGES[key] || SHINGLE_IMAGES[`Pinnacle|${colorName}`] || SHINGLE_IMAGES[`Pinnacle|Pewter Gray`] || null;
 }
