@@ -980,14 +980,14 @@ export default function Home() {
                   </div>
                   <hr className="summary-divider" />
                   <div className="summary-row">
-                    <span style={{ color: '#475569', fontWeight: 500 }}>Project total</span>
-                    <strong style={{ fontSize: '1.25rem', color: '#0f172a' }}>${calculateTotal(selectedPackage).toLocaleString()}.00</strong>
-                  </div>
-                  <div className="summary-row">
                     <span style={{ color: '#475569', fontWeight: 500 }}>Estimated monthly payment*</span>
                     <strong style={{ fontSize: '1.25rem', color: '#d32f2f' }}>
                       ${calculateMonthly(calculateTotal(selectedPackage), 180)} / month
                     </strong>
+                  </div>
+                  <div className="summary-row">
+                    <span style={{ color: '#475569', fontWeight: 500 }}>Project total</span>
+                    <strong style={{ fontSize: '1.25rem', color: '#0f172a' }}>${calculateTotal(selectedPackage).toLocaleString()}.00</strong>
                   </div>
                 </div>
 
