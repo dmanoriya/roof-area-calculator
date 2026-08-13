@@ -860,7 +860,7 @@ export default function Home() {
                           style={{
                             background: imgSrc ? `url("${imgSrc}") center/cover no-repeat` : (texture.pattern || texture.color),
                             backgroundColor: texture.color,
-                            height: '110px',
+                            height: '240px',
                             borderRadius: '8px',
                             marginBottom: '8px'
                           }}
