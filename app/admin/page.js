@@ -35,6 +35,7 @@ export default function AdminPage() {
   const [ohioGold, setOhioGold] = useState(50);
   const [ohioElite, setOhioElite] = useState(130);
   const [aprRate, setAprRate] = useState(12.99);
+  const [termsContent, setTermsContent] = useState('');
 
   const handleVerifySuperAdmin = async (e) => {
     e.preventDefault();
@@ -130,6 +131,9 @@ export default function AdminPage() {
         setOhioGold(data.settings.goldOhioAdj ?? 50);
         setOhioElite(data.settings.eliteOhioAdj ?? 130);
         setAprRate(data.settings.aprRate ?? 12.99);
+        if (data.settings.termsAndConditions) {
+          setTermsContent(data.settings.termsAndConditions);
+        }
       }
     } catch (err) {
       console.error('Error fetching settings:', err);
@@ -145,7 +149,8 @@ export default function AdminPage() {
         silverOhioAdj: Number(ohioSilver),
         goldOhioAdj: Number(ohioGold),
         eliteOhioAdj: Number(ohioElite),
-        aprRate: Number(aprRate)
+        aprRate: Number(aprRate),
+        termsAndConditions: termsContent
       };
 
       if (isApiKeyUnlocked && apiKey) {
@@ -745,6 +750,22 @@ export default function AdminPage() {
                 onChange={e => setNewAdminPassword(e.target.value)}
                 placeholder="Enter new admin password..."
               />
+            </div>
+
+            <div className="form-section-head">5. Terms &amp; Conditions Content</div>
+            <div className="form-group" style={{ marginBottom: '24px' }}>
+              <label className="form-label">Public Calculator Terms &amp; Conditions Text</label>
+              <textarea
+                className="form-input"
+                rows={8}
+                style={{ fontFamily: 'monospace', fontSize: '0.85rem', lineHeight: '1.4', resize: 'vertical' }}
+                value={termsContent}
+                onChange={e => setTermsContent(e.target.value)}
+                placeholder="Enter project terms and conditions here..."
+              />
+              <span style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '4px', display: 'block' }}>
+                ✏️ Users must scroll through this exact text to enable the Accept button on the calculator proposal page.
+              </span>
             </div>
 
             <button className="btn-primary-lg" style={{ marginTop: '10px' }} onClick={handleSaveSettings}>

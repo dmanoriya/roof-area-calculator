@@ -26,7 +26,27 @@ const DEFAULT_SETTINGS = {
     medium: 1.15,
     steep: 1.25,
     high: 1.41
-  }
+  },
+  termsAndConditions: `IRON HORSE ROOFING - TERMS & CONDITIONS
+
+1. AUTHORIZATION & SCOPE OF WORK
+By accepting this proposal, Client authorizes Iron Horse Roofing (IHR) to perform the roof replacement or repair services as specified in the selected package. All work will be performed in accordance with manufacturer specifications, local building codes, and industry standards.
+
+2. PAYMENT & DEPOSIT REQUIREMENTS
+- For direct payments (Credit Card, ACH, or Apple Pay), a 50% deposit is required upon scheduling your project date, with the remaining 50% balance due immediately upon completion of the roofing installation.
+- For financed projects (GoodLeap or designated lending partners), formal loan approval must be finalized prior to material delivery and project commencement.
+
+3. PRE-EXISTING CONDITIONS & EXTRA OSB SHEETS
+Any unforeseen structural defects, decayed roof decking beyond the OSB sheet allowance included in your chosen package tier (Silver: 2 sheets, Gold: 3 sheets, Elite: 5 sheets), or hidden architectural damage discovered during tear-off will be documented and reviewed with Client prior to performing additional repairs.
+
+4. WARRANTY & WORKMANSHIP
+Workmanship warranties are provided by Iron Horse Roofing according to the package selected (Silver: 3-Year, Gold: 10-Year, Elite: Lifetime). Shingle product warranties are provided directly by Atlas Roofing Corporation.
+
+5. PROPERTY ACCESS & PREPARATION
+Client agrees to provide reasonable driveway access and property clearance for crew vehicles, dumpsters, and material delivery during scheduled installation dates. Iron Horse Roofing will exercise extreme care to protect landscaping and property.
+
+6. CANCELLATION & REFUNDS
+Orders cancelled after material dispatch or within 48 hours of scheduled installation date may be subject to material restocking fees.`
 };
 
 function readSettings() {

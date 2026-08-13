@@ -53,6 +53,41 @@ export default function Home() {
   const [backupDate, setBackupDate] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('15yr');
   const [agreeChecked, setAgreeChecked] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
+  const [termsContent, setTermsContent] = useState(`IRON HORSE ROOFING - TERMS & CONDITIONS
+
+1. AUTHORIZATION & SCOPE OF WORK
+By accepting this proposal, Client authorizes Iron Horse Roofing (IHR) to perform the roof replacement or repair services as specified in the selected package. All work will be performed in accordance with manufacturer specifications, local building codes, and industry standards.
+
+2. PAYMENT & DEPOSIT REQUIREMENTS
+- For direct payments (Credit Card, ACH, or Apple Pay), a 50% deposit is required upon scheduling your project date, with the remaining 50% balance due immediately upon completion of the roofing installation.
+- For financed projects (GoodLeap or designated lending partners), formal loan approval must be finalized prior to material delivery and project commencement.
+
+3. PRE-EXISTING CONDITIONS & EXTRA OSB SHEETS
+Any unforeseen structural defects, decayed roof decking beyond the OSB sheet allowance included in your chosen package tier (Silver: 2 sheets, Gold: 3 sheets, Elite: 5 sheets), or hidden architectural damage discovered during tear-off will be documented and reviewed with Client prior to performing additional repairs.
+
+4. WARRANTY & WORKMANSHIP
+Workmanship warranties are provided by Iron Horse Roofing according to the package selected (Silver: 3-Year, Gold: 10-Year, Elite: Lifetime). Shingle product warranties are provided directly by Atlas Roofing Corporation.
+
+5. PROPERTY ACCESS & PREPARATION
+Client agrees to provide reasonable driveway access and property clearance for crew vehicles, dumpsters, and material delivery during scheduled installation dates. Iron Horse Roofing will exercise extreme care to protect landscaping and property.
+
+6. CANCELLATION & REFUNDS
+Orders cancelled after material dispatch or within 48 hours of scheduled installation date may be subject to material restocking fees.`);
+
+  const handleTermsScroll = (e) => {
+    const el = e.target;
+    const isBottom = Math.ceil(el.scrollTop + el.clientHeight) >= el.scrollHeight - 25;
+    if (isBottom) {
+      setHasScrolledToBottom(true);
+    }
+  };
+
+  const handleOpenTermsModal = () => {
+    setHasScrolledToBottom(false);
+    setShowTermsModal(true);
+  };
   const [signature, setSignature] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -184,6 +219,9 @@ export default function Home() {
             eliteOhioAdj: data.settings.eliteOhioAdj ?? 130,
             aprRate: data.settings.aprRate ?? 12.99
           });
+          if (data.settings.termsAndConditions) {
+            setTermsContent(data.settings.termsAndConditions);
+          }
         }
       })
       .catch(() => {});
@@ -1119,27 +1157,45 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* INLINE CONSENT CHECKBOX ALIGNMENT */}
-                <div style={{ margin: '20px 0' }}>
-                  <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '12px' }}>
+                {/* INLINE CONSENT CHECKBOX ALIGNMENT & TERMS MODAL TRIGGER */}
+                <div style={{ margin: '20px 0', background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                  <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', gap: '12px' }}>
                     <input
                       type="checkbox"
                       id="agree"
                       checked={agreeChecked}
                       onChange={e => {
-                        setAgreeChecked(e.target.checked);
-                        if (formErrors.agreeChecked && e.target.checked) {
-                          setFormErrors(prev => ({ ...prev, agreeChecked: null }));
+                        if (!agreeChecked) {
+                          e.preventDefault();
+                          handleOpenTermsModal();
+                        } else {
+                          setAgreeChecked(false);
                         }
                       }}
-                      style={{ width: '22px', height: '22px', cursor: 'pointer', flexShrink: 0 }}
+                      style={{ width: '22px', height: '22px', cursor: 'pointer', flexShrink: 0, marginTop: '2px' }}
                     />
-                    <label htmlFor="agree" style={{ fontSize: '0.95rem', color: 'var(--text-main)', cursor: 'pointer', margin: 0, fontWeight: 500 }}>
-                      I agree to the roof specifications, pricing terms, and contract conditions.
-                    </label>
+                    <div style={{ fontSize: '0.95rem', color: 'var(--text-main)', margin: 0, fontWeight: 500, lineHeight: '1.4' }}>
+                      I agree to the roof specifications, pricing terms, and{' '}
+                      <button
+                        type="button"
+                        onClick={handleOpenTermsModal}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: 'var(--primary-red)',
+                          fontWeight: 700,
+                          textDecoration: 'underline',
+                          cursor: 'pointer',
+                          padding: 0,
+                          font: 'inherit'
+                        }}
+                      >
+                        Terms &amp; Conditions
+                      </button>.
+                    </div>
                   </div>
                   {formErrors.agreeChecked && (
-                    <span style={{ color: '#d32f2f', fontSize: '0.78rem', marginTop: '6px', fontWeight: 600, display: 'block' }}>
+                    <span style={{ color: '#d32f2f', fontSize: '0.78rem', marginTop: '8px', fontWeight: 600, display: 'block' }}>
                       ⚠️ {formErrors.agreeChecked}
                     </span>
                   )}
@@ -1185,6 +1241,110 @@ export default function Home() {
           </>
         )}
       </main>
+
+      {/* TERMS & CONDITIONS SCROLL MODAL */}
+      {showTermsModal && (
+        <div className="modal-backdrop" onClick={() => setShowTermsModal(false)}>
+          <div
+            className="modal-content"
+            onClick={e => e.stopPropagation()}
+            style={{
+              maxWidth: '650px',
+              width: '90%',
+              borderRadius: '24px',
+              padding: '28px',
+              background: '#ffffff',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              maxHeight: '90vh',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+              <h3 style={{ fontSize: '1.3rem', fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                📜 Terms &amp; Conditions Agreement
+              </h3>
+              <button
+                className="modal-close"
+                onClick={() => setShowTermsModal(false)}
+                style={{ position: 'static', background: '#f1f5f9', border: 'none', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                &times;
+              </button>
+            </div>
+
+            <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '14px' }}>
+              Please scroll to the bottom of the terms below to enable the <strong>Accept &amp; Agree</strong> button.
+            </p>
+
+            {/* SCROLLABLE TERMS CONTAINER */}
+            <div
+              onScroll={handleTermsScroll}
+              style={{
+                maxHeight: '340px',
+                overflowY: 'auto',
+                padding: '20px',
+                background: '#f8fafc',
+                borderRadius: '16px',
+                border: '2px solid #e2e8f0',
+                fontSize: '0.88rem',
+                color: '#334155',
+                lineHeight: '1.6',
+                whiteSpace: 'pre-wrap',
+                marginBottom: '16px'
+              }}
+            >
+              {termsContent}
+            </div>
+
+            {/* SCROLL STATUS INDICATOR */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <span style={{ fontSize: '0.82rem', fontWeight: 700, color: hasScrolledToBottom ? '#16a34a' : '#ea580c' }}>
+                {hasScrolledToBottom
+                  ? '✅ You have read to the end. Click Accept below.'
+                  : '⏬ Please scroll to the bottom to accept.'}
+              </span>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => setShowTermsModal(false)}
+                style={{ background: '#f1f5f9', color: '#475569', border: '1px solid #cbd5e1', padding: '10px 20px', borderRadius: '10px', fontWeight: 600, cursor: 'pointer' }}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                disabled={!hasScrolledToBottom}
+                onClick={() => {
+                  setAgreeChecked(true);
+                  if (formErrors.agreeChecked) {
+                    setFormErrors(prev => ({ ...prev, agreeChecked: null }));
+                  }
+                  setShowTermsModal(false);
+                }}
+                style={{
+                  padding: '10px 24px',
+                  borderRadius: '10px',
+                  fontWeight: 800,
+                  fontSize: '0.95rem',
+                  border: 'none',
+                  transition: 'all 0.2s ease',
+                  cursor: hasScrolledToBottom ? 'pointer' : 'not-allowed',
+                  background: hasScrolledToBottom ? 'var(--primary-red)' : '#cbd5e1',
+                  color: hasScrolledToBottom ? '#ffffff' : '#94a3b8',
+                  boxShadow: hasScrolledToBottom ? '0 4px 12px rgba(211, 47, 47, 0.3)' : 'none'
+                }}
+              >
+                Accept &amp; Agree
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
