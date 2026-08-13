@@ -20,6 +20,7 @@ export default function RoofMapCanvas({
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const polygonRef = useRef(null);
+  const cornerMarkersRef = useRef([]);
   const drawingManagerRef = useRef(null);
 
   // Default center fallback (Raleigh, NC)
@@ -28,6 +29,17 @@ export default function RoofMapCanvas({
 
   const [pointsCount, setPointsCount] = useState(0);
   const [solarDetected, setSolarDetected] = useState(false);
+
+  const clearPolygonAndMarkers = useCallback(() => {
+    if (polygonRef.current) {
+      polygonRef.current.setMap(null);
+      polygonRef.current = null;
+    }
+    if (cornerMarkersRef.current && cornerMarkersRef.current.length) {
+      cornerMarkersRef.current.forEach(m => m.setMap(null));
+      cornerMarkersRef.current = [];
+    }
+  }, []);
 
   const updateAreaFromPoly = useCallback((poly) => {
     if (!window.google?.maps?.geometry || !poly) return;
@@ -54,10 +66,7 @@ export default function RoofMapCanvas({
   const drawPolygonFromCoords = useCallback((coordsList, isEditable = true) => {
     if (!mapInstanceRef.current || !window.google?.maps?.Polygon || !coordsList || !coordsList.length) return;
 
-    if (polygonRef.current) {
-      polygonRef.current.setMap(null);
-      polygonRef.current = null;
-    }
+    clearPolygonAndMarkers();
 
     const path = coordsList.map(c => ({
       lat: typeof c.lat === 'function' ? c.lat() : Number(c.lat),
@@ -71,7 +80,7 @@ export default function RoofMapCanvas({
       strokeWeight: 3,
       fillColor: '#dc2626',
       fillOpacity: 0.35,
-      editable: isEditable,
+      editable: false, // Disables native handles to prevent middle dots
       draggable: isEditable,
       map: mapInstanceRef.current
     });
@@ -80,8 +89,56 @@ export default function RoofMapCanvas({
     updateAreaFromPoly(poly);
 
     if (isEditable) {
-      window.google.maps.event.addListener(poly.getPath(), 'set_at', () => updateAreaFromPoly(poly));
-      window.google.maps.event.addListener(poly.getPath(), 'insert_at', () => updateAreaFromPoly(poly));
+      const cornerIcon = {
+        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
+            <circle cx="10" cy="10" r="8" fill="#ffffff" stroke="#dc2626" stroke-width="3"/>
+            <circle cx="10" cy="10" r="3" fill="#dc2626"/>
+          </svg>
+        `),
+        scaledSize: new window.google.maps.Size(20, 20),
+        anchor: new window.google.maps.Point(10, 10)
+      };
+
+      const markers = path.map((pt, i) => {
+        const marker = new window.google.maps.Marker({
+          position: pt,
+          map: mapInstanceRef.current,
+          draggable: true,
+          icon: cornerIcon,
+          zIndex: 1000 + i
+        });
+
+        window.google.maps.event.addListener(marker, 'drag', () => {
+          const newPos = marker.getPosition();
+          const polyPath = poly.getPath().getArray();
+          polyPath[i] = { lat: newPos.lat(), lng: newPos.lng() };
+          poly.setPath(polyPath);
+          updateAreaFromPoly(poly);
+        });
+
+        window.google.maps.event.addListener(marker, 'dragend', () => {
+          updateAreaFromPoly(poly);
+        });
+
+        return marker;
+      });
+
+      cornerMarkersRef.current = markers;
+
+      window.google.maps.event.addListener(poly, 'drag', () => {
+        const currentPath = poly.getPath().getArray();
+        cornerMarkersRef.current.forEach((m, idx) => {
+          if (currentPath[idx]) {
+            m.setPosition(currentPath[idx]);
+          }
+        });
+        updateAreaFromPoly(poly);
+      });
+
+      window.google.maps.event.addListener(poly, 'dragend', () => {
+        updateAreaFromPoly(poly);
+      });
     }
 
     if (window.google.maps.LatLngBounds && path.length > 0) {
@@ -89,7 +146,7 @@ export default function RoofMapCanvas({
       path.forEach(pt => bounds.extend(pt));
       mapInstanceRef.current.fitBounds(bounds);
     }
-  }, [updateAreaFromPoly]);
+  }, [clearPolygonAndMarkers, updateAreaFromPoly]);
 
   const createAutoPolygon = useCallback((centerLoc) => {
     if (!mapInstanceRef.current || !window.google?.maps?.Polygon) return;
@@ -238,13 +295,10 @@ export default function RoofMapCanvas({
           drawingManagerRef.current = dm;
 
           window.google.maps.event.addListener(dm, 'polygoncomplete', (poly) => {
-            if (polygonRef.current) polygonRef.current.setMap(null);
-            polygonRef.current = poly;
+            const drawnPath = poly.getPath().getArray();
+            poly.setMap(null);
             dm.setDrawingMode(null);
-            updateAreaFromPoly(poly);
-
-            window.google.maps.event.addListener(poly.getPath(), 'set_at', () => updateAreaFromPoly(poly));
-            window.google.maps.event.addListener(poly.getPath(), 'insert_at', () => updateAreaFromPoly(poly));
+            drawPolygonFromCoords(drawnPath, !readOnly);
           });
         }
       }
@@ -300,10 +354,7 @@ export default function RoofMapCanvas({
 
   const clearShape = () => {
     if (readOnly) return;
-    if (polygonRef.current) {
-      polygonRef.current.setMap(null);
-      polygonRef.current = null;
-    }
+    clearPolygonAndMarkers();
     setPointsCount(0);
   };
 
