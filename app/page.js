@@ -506,11 +506,8 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #e2e8f0' }}>
                 <span>Property Address</span> <strong>{propertyAddress}, {city}, {state} {zip}</strong>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #e2e8f0' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '10px' }}>
                 <span>Selected Package</span> <strong>{PRICING[selectedPackage].name} ({shingleColor})</strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '12px', fontSize: '1.3rem', color: 'var(--primary-red)', fontWeight: 800 }}>
-                <span>Total Contract Price</span> <strong>${currentTotal.toLocaleString()}</strong>
               </div>
             </div>
 
