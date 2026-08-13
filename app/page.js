@@ -743,8 +743,8 @@ export default function Home() {
                               <div className="pkg-subtitle">{pkg.subtitle}</div>
                             </div>
                             <div className="pkg-price-col">
-                              <div className="pkg-price">${tot.toLocaleString()}.00</div>
-                              <div className="pkg-permo">As low as ${m15}/mo (15-yr finance)</div>
+                              <div className="pkg-price">As low as ${m15}/mo</div>
+                              <div className="pkg-permo">Total: ${tot.toLocaleString()}.00</div>
                             </div>
                           </div>
                           <ul className="feature-list">
