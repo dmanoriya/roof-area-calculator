@@ -73,7 +73,8 @@ export function getPackageFeatures(tier, state) {
     isOhio ? 'Atlas Pinnacle Impact shingles' : 'Atlas Pinnacle Pristine + streak-free guarantee',
     'F8 drip edge',
     'Ice & water shield at eaves and valleys',
-    '5 OSB sheets + Permaboots'
+    '5 OSB sheets included',
+    'Permaboots'
   ];
 }
 
