@@ -892,20 +892,27 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
 
       {/* Fullscreen Terms & Conditions Editor Modal */}
       {isFullscreenTermsEditor && (
-        <div className="modal-backdrop" onClick={() => setIsFullscreenTermsEditor(false)} style={{ zIndex: 1100 }}>
+        <div
+          className="modal-backdrop"
+          onClick={() => setIsFullscreenTermsEditor(false)}
+          style={{ zIndex: 100000, background: 'rgba(15, 23, 42, 0.85)', backdropFilter: 'blur(8px)' }}
+        >
           <div
             className="modal-content"
             onClick={e => e.stopPropagation()}
             style={{
-              maxWidth: '920px',
+              maxWidth: '960px',
               width: '95%',
-              height: '88vh',
+              height: '90vh',
+              maxHeight: '90vh',
               borderRadius: '24px',
               padding: '28px',
               display: 'flex',
               flexDirection: 'column',
               background: '#ffffff',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35)'
+              boxShadow: '0 30px 60px -12px rgba(0, 0, 0, 0.45)',
+              zIndex: 100001,
+              position: 'relative'
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid #e2e8f0', paddingBottom: '14px' }}>
