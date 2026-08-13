@@ -1,12 +1,29 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { PRICING, ALLOWED_STATES, getPricePerSquare, calculatePMT, getPackageFeatures, INTEREST_RATE } from '../data/pricingData';
 import { getPackageColorList, getPackageShingleName, COLOR_TEXTURES, getShingleImage } from '../data/shingleData';
 import RoofMapCanvas from '../components/RoofMapCanvas';
 
+function addBusinessDays(startDate, businessDays) {
+  const result = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+  let added = 0;
+  while (added < businessDays) {
+    result.setDate(result.getDate() + 1);
+    const day = result.getDay();
+    if (day !== 0 && day !== 6) added += 1;
+  }
+  return result;
+}
 
+function formatDateInputValue(date) {
+  return [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, '0'),
+    String(date.getDate()).padStart(2, '0')
+  ].join('-');
+}
 
 export default function Home() {
   const addressInputRef = useRef(null);
@@ -144,6 +161,14 @@ export default function Home() {
     if (zipVal) setZip(zipVal);
   }, []);
 
+  const { prefDateMin, backupDateMin } = useMemo(() => {
+    const today = new Date();
+    return {
+      prefDateMin: formatDateInputValue(addBusinessDays(today, 10)),
+      backupDateMin: formatDateInputValue(addBusinessDays(today, 15))
+    };
+  }, []);
+
   useEffect(() => {
     fetch('/api/settings')
       .then(res => res.json())
@@ -163,10 +188,9 @@ export default function Home() {
       })
       .catch(() => {});
 
-    const d = new Date();
-    d.setDate(d.getDate() + 14);
-    setPrefDate(d.toISOString().slice(0, 10));
-  }, []);
+    setPrefDate(prefDateMin);
+    setBackupDate(backupDateMin);
+  }, [prefDateMin, backupDateMin]);
 
   // Bind Google Places Autocomplete directly in Step 0
   useEffect(() => {
@@ -902,6 +926,7 @@ export default function Home() {
                       type="date"
                       className="form-input"
                       id="pref-date-input"
+                      min={prefDateMin}
                       value={prefDate}
                       onChange={e => setPrefDate(e.target.value)}
                     />
@@ -927,6 +952,7 @@ export default function Home() {
                       type="date"
                       className="form-input"
                       id="backup-date-input"
+                      min={backupDateMin}
                       value={backupDate}
                       onChange={e => setBackupDate(e.target.value)}
                     />
