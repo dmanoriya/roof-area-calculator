@@ -447,9 +447,6 @@ export default function Home() {
               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #e2e8f0' }}>
                 <span>Selected Package</span> <strong>{PRICING[selectedPackage].name} ({shingleColor})</strong>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #e2e8f0' }}>
-                <span>Scope Size</span> <strong>{adjSquares} Adjusted Squares ({areaSqFt} Sq Ft)</strong>
-              </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '12px', fontSize: '1.3rem', color: 'var(--primary-red)', fontWeight: 800 }}>
                 <span>Total Contract Price</span> <strong>${currentTotal.toLocaleString()}</strong>
               </div>
@@ -687,37 +684,17 @@ export default function Home() {
                   onCoordinatesChange={setMapCoords}
                 />
 
-                {/* Live Metrics Bar */}
-                <div className="metrics-grid-bar">
-                  <div className="metric-stat-card">
-                    <div className="metric-val">{areaSqFt.toLocaleString()}</div>
-                    <div className="metric-lbl">Measured Area (Sq Ft)</div>
-                  </div>
-                  <div className="metric-stat-card">
-                    <div className="metric-val">{squares}</div>
-                    <div className="metric-lbl">Base Squares</div>
-                  </div>
-                  <div className="metric-stat-card">
-                    <div className="metric-val">{adjSquares}</div>
-                    <div className="metric-lbl">Adjusted Squares</div>
-                  </div>
-                  <div className="metric-stat-card">
-                    <div className="metric-val">{pitchMultipliers[pitch]}x</div>
-                    <div className="metric-lbl">Pitch Multiplier</div>
-                  </div>
-                </div>
-
                 {/* Pitch & Waste Controls */}
-                <div className="form-section-head">Roof Pitch &amp; Waste Factor Adjustment</div>
+                <div className="form-section-head" style={{ marginTop: '20px' }}>Roof Pitch &amp; Waste Factor</div>
                 <div className="form-grid-2">
                   <div className="form-group">
                     <label className="form-label">Roof Slope / Pitch *</label>
                     <select className="form-select" value={pitch} onChange={e => setPitch(e.target.value)}>
-                      <option value="flat">FLAT (1.00x - Commercial/Flat)</option>
-                      <option value="low">LOW (1.05x - Slight Slope)</option>
-                      <option value="medium">MEDIUM (1.15x - Standard Residential)</option>
-                      <option value="steep">STEEP (1.25x - Steep Incline)</option>
-                      <option value="high">HIGH (1.41x - A-Frame/Victorian)</option>
+                      <option value="flat">FLAT (Commercial/Flat)</option>
+                      <option value="low">LOW (Slight Slope)</option>
+                      <option value="medium">MEDIUM (Standard Residential)</option>
+                      <option value="steep">STEEP (Steep Incline)</option>
+                      <option value="high">HIGH (A-Frame/Victorian)</option>
                     </select>
                   </div>
                   <div className="form-group">
@@ -726,7 +703,9 @@ export default function Home() {
                       type="number"
                       className="form-input"
                       value={waste}
-                      onChange={e => setWaste(parseFloat(e.target.value) || 0)}
+                      disabled
+                      readOnly
+                      style={{ backgroundColor: '#f1f5f9', cursor: 'not-allowed', color: '#64748b' }}
                     />
                   </div>
                 </div>
@@ -750,7 +729,7 @@ export default function Home() {
                 <div className="step-header">
                   <h2 className="step-title">Choose Your Roof Package</h2>
                   <p className="step-description">
-                    Tailored pricing for {adjSquares} adjusted squares at {propertyAddress}.
+                    Tailored pricing for your property at {propertyAddress}.
                   </p>
                 </div>
 
@@ -1109,9 +1088,6 @@ export default function Home() {
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                     <span style={{ color: '#64748b' }}>Preferred Start Date</span> <strong>{prefDate || 'Not set'}</strong>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                    <span style={{ color: '#64748b' }}>Roof Size</span> <strong>{adjSquares} Adjusted Squares ({areaSqFt} Sq Ft)</strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                     <span style={{ color: '#64748b' }}>Payment Method</span>
