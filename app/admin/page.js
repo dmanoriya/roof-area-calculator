@@ -36,6 +36,29 @@ export default function AdminPage() {
   const [ohioElite, setOhioElite] = useState(130);
   const [aprRate, setAprRate] = useState(12.99);
   const [termsContent, setTermsContent] = useState('');
+  const [isFullscreenTermsEditor, setIsFullscreenTermsEditor] = useState(false);
+  const [isTermsPreviewOpen, setIsTermsPreviewOpen] = useState(false);
+
+  const defaultTermsTemplate = `IRON HORSE ROOFING - TERMS & CONDITIONS
+
+1. AUTHORIZATION & SCOPE OF WORK
+By accepting this proposal, Client authorizes Iron Horse Roofing (IHR) to perform the roof replacement or repair services as specified in the selected package. All work will be performed in accordance with manufacturer specifications, local building codes, and industry standards.
+
+2. PAYMENT & DEPOSIT REQUIREMENTS
+- For direct payments (Credit Card, ACH, or Apple Pay), a 50% deposit is required upon scheduling your project date, with the remaining 50% balance due immediately upon completion of the roofing installation.
+- For financed projects (GoodLeap or designated lending partners), formal loan approval must be finalized prior to material delivery and project commencement.
+
+3. PRE-EXISTING CONDITIONS & EXTRA OSB SHEETS
+Any unforeseen structural defects, decayed roof decking beyond the OSB sheet allowance included in your chosen package tier (Silver: 2 sheets, Gold: 3 sheets, Elite: 5 sheets), or hidden architectural damage discovered during tear-off will be documented and reviewed with Client prior to performing additional repairs.
+
+4. WARRANTY & WORKMANSHIP
+Workmanship warranties are provided by Iron Horse Roofing according to the package selected (Silver: 3-Year, Gold: 10-Year, Elite: Lifetime). Shingle product warranties are provided directly by Atlas Roofing Corporation.
+
+5. PROPERTY ACCESS & PREPARATION
+Client agrees to provide reasonable driveway access and property clearance for crew vehicles, dumpsters, and material delivery during scheduled installation dates. Iron Horse Roofing will exercise extreme care to protect landscaping and property.
+
+6. CANCELLATION & REFUNDS
+Orders cancelled after material dispatch or within 48 hours of scheduled installation date may be subject to material restocking fees.`;
 
   const handleVerifySuperAdmin = async (e) => {
     e.preventDefault();
@@ -752,20 +775,66 @@ export default function AdminPage() {
               />
             </div>
 
-            <div className="form-section-head">5. Terms &amp; Conditions Content</div>
-            <div className="form-group" style={{ marginBottom: '24px' }}>
-              <label className="form-label">Public Calculator Terms &amp; Conditions Text</label>
+            <div className="form-section-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>5. Terms &amp; Conditions Content</span>
+              <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>
+                📊 {termsContent ? termsContent.trim().split(/\s+/).filter(Boolean).length : 0} Words | {termsContent ? termsContent.split('\n').length : 0} Lines
+              </span>
+            </div>
+
+            <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '16px', border: '1px solid #cbd5e1', marginBottom: '24px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                <label className="form-label" style={{ fontWeight: 800, margin: 0, color: '#0f172a' }}>
+                  📜 Legal Terms &amp; Conditions Text
+                </label>
+
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    type="button"
+                    style={{ fontSize: '0.78rem', padding: '6px 12px', background: '#e2e8f0', color: '#334155', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 700 }}
+                    onClick={() => {
+                      if (confirm('Load standard template? This will replace current terms text.')) {
+                        setTermsContent(defaultTermsTemplate);
+                      }
+                    }}
+                  >
+                    📋 Reset Template
+                  </button>
+
+                  <button
+                    type="button"
+                    style={{ fontSize: '0.78rem', padding: '6px 12px', background: 'var(--primary-red)', color: '#ffffff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 700 }}
+                    onClick={() => setIsFullscreenTermsEditor(true)}
+                  >
+                    🔍 Fullscreen Editor
+                  </button>
+                </div>
+              </div>
+
               <textarea
                 className="form-input"
-                rows={8}
-                style={{ fontFamily: 'monospace', fontSize: '0.85rem', lineHeight: '1.4', resize: 'vertical' }}
+                style={{
+                  minHeight: '260px',
+                  fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                  fontSize: '0.95rem',
+                  lineHeight: '1.6',
+                  color: '#1e293b',
+                  background: '#ffffff',
+                  border: '1.5px solid #cbd5e1',
+                  borderRadius: '12px',
+                  padding: '16px',
+                  resize: 'vertical'
+                }}
                 value={termsContent}
                 onChange={e => setTermsContent(e.target.value)}
-                placeholder="Enter project terms and conditions here..."
+                placeholder="Write or paste your Terms and Conditions here..."
               />
-              <span style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '4px', display: 'block' }}>
-                ✏️ Users must scroll through this exact text to enable the Accept button on the calculator proposal page.
-              </span>
+
+              <div style={{ marginTop: '8px' }}>
+                <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                  ✏️ Tip: Click <strong>Fullscreen Editor</strong> to comfortably write or edit large amounts of text.
+                </span>
+              </div>
             </div>
 
             <button className="btn-primary-lg" style={{ marginTop: '10px' }} onClick={handleSaveSettings}>
@@ -817,6 +886,88 @@ export default function AdminPage() {
                 Verify &amp; Unlock Key &rarr;
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Fullscreen Terms & Conditions Editor Modal */}
+      {isFullscreenTermsEditor && (
+        <div className="modal-backdrop" onClick={() => setIsFullscreenTermsEditor(false)} style={{ zIndex: 1100 }}>
+          <div
+            className="modal-content"
+            onClick={e => e.stopPropagation()}
+            style={{
+              maxWidth: '920px',
+              width: '95%',
+              height: '88vh',
+              borderRadius: '24px',
+              padding: '28px',
+              display: 'flex',
+              flexDirection: 'column',
+              background: '#ffffff',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35)'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid #e2e8f0', paddingBottom: '14px' }}>
+              <div>
+                <h2 style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--primary-red)', margin: 0, fontWeight: 800, fontSize: '1.4rem' }}>
+                  📜 Terms &amp; Conditions Editor (Fullscreen)
+                </h2>
+                <span style={{ fontSize: '0.82rem', color: '#64748b' }}>
+                  Spacious workspace to comfortably write or edit legal contracts.
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ fontSize: '0.82rem', background: '#f1f5f9', padding: '6px 12px', borderRadius: '8px', fontWeight: 700, color: '#334155' }}>
+                  📊 {termsContent ? termsContent.trim().split(/\s+/).filter(Boolean).length : 0} Words | {termsContent ? termsContent.split('\n').length : 0} Lines
+                </span>
+                <button className="modal-close" style={{ position: 'static' }} onClick={() => setIsFullscreenTermsEditor(false)}>&times;</button>
+              </div>
+            </div>
+
+            <textarea
+              style={{
+                flex: 1,
+                width: '100%',
+                fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                fontSize: '1rem',
+                lineHeight: '1.7',
+                color: '#0f172a',
+                background: '#fafafa',
+                border: '1.5px solid #cbd5e1',
+                borderRadius: '16px',
+                padding: '20px',
+                resize: 'none',
+                outline: 'none'
+              }}
+              value={termsContent}
+              onChange={e => setTermsContent(e.target.value)}
+              placeholder="Type or paste your legal terms and conditions here..."
+            />
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', paddingTop: '12px', borderTop: '1px solid #e2e8f0' }}>
+              <button
+                type="button"
+                className="btn-secondary"
+                style={{ background: '#e2e8f0', color: '#334155', borderRadius: '8px', padding: '10px 16px', fontWeight: 600 }}
+                onClick={() => {
+                  if (confirm('Reset to default standard template?')) {
+                    setTermsContent(defaultTermsTemplate);
+                  }
+                }}
+              >
+                📋 Reset to Standard Template
+              </button>
+
+              <button
+                type="button"
+                className="btn-primary-lg"
+                style={{ padding: '0 28px', height: '44px', width: 'auto', fontSize: '0.95rem' }}
+                onClick={() => setIsFullscreenTermsEditor(false)}
+              >
+                Done Editing &rsaquo;
+              </button>
+            </div>
           </div>
         </div>
       )}
