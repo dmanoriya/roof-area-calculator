@@ -30,6 +30,8 @@ export default function RoofMapCanvas({
   const [pointsCount, setPointsCount] = useState(0);
   const [solarDetected, setSolarDetected] = useState(false);
 
+  const [activeShape, setActiveShape] = useState('auto');
+
   const clearPolygonAndMarkers = useCallback(() => {
     if (polygonRef.current) {
       polygonRef.current.setMap(null);
@@ -80,7 +82,7 @@ export default function RoofMapCanvas({
       strokeWeight: 3,
       fillColor: '#dc2626',
       fillOpacity: 0.35,
-      editable: false, // Disables native handles to prevent middle dots
+      editable: false,
       draggable: isEditable,
       map: mapInstanceRef.current
     });
@@ -148,33 +150,114 @@ export default function RoofMapCanvas({
     }
   }, [clearPolygonAndMarkers, updateAreaFromPoly]);
 
-  const createAutoPolygon = useCallback((centerLoc) => {
+  const createAutoPolygon = useCallback((centerLoc, shapeType = 'rectangle') => {
     if (!mapInstanceRef.current || !window.google?.maps?.Polygon) return;
 
-    // Purge previous polygon if present
-    if (polygonRef.current) {
-      polygonRef.current.setMap(null);
-      polygonRef.current = null;
-    }
+    clearPolygonAndMarkers();
 
     const lat = typeof centerLoc.lat === 'function' ? centerLoc.lat() : centerLoc.lat;
     const lng = typeof centerLoc.lng === 'function' ? centerLoc.lng() : centerLoc.lng;
 
     currentCenterRef.current = { lat, lng };
 
-    // ~12m x 14m roof bounding box
-    const latDelta = 0.00011;
-    const lngDelta = 0.00013;
+    let coords = [];
+    const dy = 0.00018;
+    const dx = 0.00022;
 
-    const coords = [
-      { lat: lat + latDelta, lng: lng - lngDelta },
-      { lat: lat + latDelta, lng: lng + lngDelta },
-      { lat: lat - latDelta, lng: lng + lngDelta },
-      { lat: lat - latDelta, lng: lng - lngDelta }
-    ];
+    if (shapeType === 'l-shape') {
+      coords = [
+        { lat: lat + dy, lng: lng - dx },
+        { lat: lat + dy, lng: lng },
+        { lat: lat, lng: lng },
+        { lat: lat, lng: lng + dx },
+        { lat: lat - dy, lng: lng + dx },
+        { lat: lat - dy, lng: lng - dx }
+      ];
+    } else if (shapeType === 't-shape') {
+      coords = [
+        { lat: lat + dy, lng: lng - dx/3 },
+        { lat: lat + dy, lng: lng + dx/3 },
+        { lat: lat + dy/3, lng: lng + dx/3 },
+        { lat: lat + dy/3, lng: lng + dx },
+        { lat: lat - dy/3, lng: lng + dx },
+        { lat: lat - dy/3, lng: lng + dx/3 },
+        { lat: lat - dy, lng: lng + dx/3 },
+        { lat: lat - dy, lng: lng - dx/3 },
+        { lat: lat - dy/3, lng: lng - dx/3 },
+        { lat: lat - dy/3, lng: lng - dx },
+        { lat: lat + dy/3, lng: lng - dx },
+        { lat: lat + dy/3, lng: lng - dx/3 }
+      ];
+    } else {
+      // Standard rectangle box
+      coords = [
+        { lat: lat + dy, lng: lng - dx },
+        { lat: lat + dy, lng: lng + dx },
+        { lat: lat - dy, lng: lng + dx },
+        { lat: lat - dy, lng: lng - dx }
+      ];
+    }
 
     drawPolygonFromCoords(coords, !readOnly);
-  }, [drawPolygonFromCoords, readOnly]);
+  }, [clearPolygonAndMarkers, drawPolygonFromCoords, readOnly]);
+
+  const rotateCurrentPolygon = (degrees) => {
+    if (!polygonRef.current || readOnly) return;
+    const path = polygonRef.current.getPath().getArray();
+    if (!path || path.length < 3) return;
+
+    let sumLat = 0, sumLng = 0;
+    path.forEach(pt => {
+      sumLat += pt.lat();
+      sumLng += pt.lng();
+    });
+    const cLat = sumLat / path.length;
+    const cLng = sumLng / path.length;
+
+    const rad = (degrees * Math.PI) / 180;
+    const cosLat = Math.cos((cLat * Math.PI) / 180);
+
+    const newCoords = path.map(pt => {
+      const dy = pt.lat() - cLat;
+      const dx = (pt.lng() - cLng) * cosLat;
+
+      const rotatedDx = dx * Math.cos(rad) - dy * Math.sin(rad);
+      const rotatedDy = dx * Math.sin(rad) + dy * Math.cos(rad);
+
+      return {
+        lat: cLat + rotatedDy,
+        lng: cLng + (rotatedDx / cosLat)
+      };
+    });
+
+    drawPolygonFromCoords(newCoords, !readOnly);
+  };
+
+  const scaleCurrentPolygon = (factor) => {
+    if (!polygonRef.current || readOnly) return;
+    const path = polygonRef.current.getPath().getArray();
+    if (!path || path.length < 3) return;
+
+    let sumLat = 0, sumLng = 0;
+    path.forEach(pt => {
+      sumLat += pt.lat();
+      sumLng += pt.lng();
+    });
+    const cLat = sumLat / path.length;
+    const cLng = sumLng / path.length;
+
+    const newCoords = path.map(pt => {
+      const dy = pt.lat() - cLat;
+      const dx = pt.lng() - cLng;
+
+      return {
+        lat: cLat + dy * factor,
+        lng: cLng + dx * factor
+      };
+    });
+
+    drawPolygonFromCoords(newCoords, !readOnly);
+  };
 
   const [solarStatusMsg, setSolarStatusMsg] = useState('');
 
@@ -189,8 +272,9 @@ export default function RoofMapCanvas({
         setSolarDetected(true);
         setSolarStatusMsg('AI Solar Active');
 
+        let sqMeters = 0;
         if (data.solarPotential.wholeRoofStats) {
-          const sqMeters = data.solarPotential.wholeRoofStats.areaMeters2;
+          sqMeters = data.solarPotential.wholeRoofStats.areaMeters2;
           if (sqMeters && sqMeters > 20) {
             const solarSqFt = Math.round(sqMeters * 10.7639);
             const solarSq = Math.max(Math.round(solarSqFt / 100), 5);
@@ -198,7 +282,6 @@ export default function RoofMapCanvas({
           }
         }
 
-        // Draw exact polygon from Solar API bounding box if available
         if (data.boundingBox && data.boundingBox.sw && data.boundingBox.ne) {
           const sw = data.boundingBox.sw;
           const ne = data.boundingBox.ne;
@@ -209,19 +292,26 @@ export default function RoofMapCanvas({
             { lat: sw.latitude, lng: sw.longitude }
           ];
           drawPolygonFromCoords(solarCoords, !readOnly);
+        } else if (sqMeters > 50) {
+          // Dynamic scale based on roof area meters
+          const sideMeter = Math.sqrt(sqMeters);
+          const dy = (sideMeter / 111111) * 0.55;
+          const dx = (sideMeter / (111111 * Math.cos((lat * Math.PI) / 180))) * 0.55;
+          const solarCoords = [
+            { lat: lat + dy, lng: lng - dx },
+            { lat: lat + dy, lng: lng + dx },
+            { lat: lat - dy, lng: lng + dx },
+            { lat: lat - dy, lng: lng - dx }
+          ];
+          drawPolygonFromCoords(solarCoords, !readOnly);
         }
       } else if (data && data.error) {
         setSolarDetected(false);
-        if (data.error.status === 'PERMISSION_DENIED' || data.error.reason === 'API_KEY_SERVICE_BLOCKED') {
-          setSolarStatusMsg('Solar API Disabled on Key');
-          console.warn('Google Solar API Notice: Enable solar.googleapis.com in Google Cloud Console for API key:', apiKey);
-        } else {
-          setSolarStatusMsg('Roof Satellite Fit');
-        }
+        setSolarStatusMsg('Roof Fit');
       }
     } catch (e) {
       setSolarDetected(false);
-      setSolarStatusMsg('Roof Satellite Fit');
+      setSolarStatusMsg('Roof Fit');
     }
   }, [apiKey, drawPolygonFromCoords, onMetricsChange, readOnly]);
 
@@ -270,11 +360,10 @@ export default function RoofMapCanvas({
 
         mapInstanceRef.current = googleMap;
 
-        // Priority 1: Render exact saved initialCoordinates if provided!
         if (initialCoordinates && Array.isArray(initialCoordinates) && initialCoordinates.length >= 3) {
           drawPolygonFromCoords(initialCoordinates, !readOnly);
         } else {
-          createAutoPolygon(targetLoc);
+          createAutoPolygon(targetLoc, 'rectangle');
           fetchSolarRoofInsights(targetLoc.lat, targetLoc.lng);
         }
 
@@ -309,7 +398,6 @@ export default function RoofMapCanvas({
     return () => { isMounted = false; };
   }, [apiKey, createAutoPolygon, drawPolygonFromCoords, fetchSolarRoofInsights, initialCoordinates, readOnly, selectedLocation, updateAreaFromPoly]);
 
-  // Update map center & polygon when selectedLocation changes
   useEffect(() => {
     if (!mapInstanceRef.current || !selectedLocation) return;
     if (initialCoordinates && Array.isArray(initialCoordinates) && initialCoordinates.length >= 3) return;
@@ -326,11 +414,10 @@ export default function RoofMapCanvas({
     mapInstanceRef.current.setCenter(loc);
     mapInstanceRef.current.setZoom(20);
 
-    createAutoPolygon(loc);
+    createAutoPolygon(loc, 'rectangle');
     fetchSolarRoofInsights(lat, lng);
   }, [selectedLocation, initialCoordinates, createAutoPolygon, fetchSolarRoofInsights]);
 
-  // Trigger map resize & zoom to building level when Step 1 becomes visible
   useEffect(() => {
     if (!isVisible || !mapInstanceRef.current || !window.google?.maps) return;
 
@@ -383,6 +470,7 @@ export default function RoofMapCanvas({
                 onClick={() => {
                   if (onModeChange) onModeChange('auto');
                   if (drawingManagerRef.current) drawingManagerRef.current.setDrawingMode(null);
+                  createAutoPolygon(currentCenterRef.current, 'rectangle');
                 }}
               >
                 ⚡ Auto Roof Detect {solarStatusMsg ? `(${solarStatusMsg})` : ''}
@@ -397,15 +485,78 @@ export default function RoofMapCanvas({
                   }
                 }}
               >
-                ✏️ Manual Polygon Outline
+                ✏️ Manual Outline
               </button>
             </div>
-            <div className="map-tools">
+
+            {/* HOUSE SHAPE PRESETS */}
+            <div className="map-tools" style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+              <span style={{ color: '#94a3b8', fontSize: '0.78rem', fontWeight: 600, textTransform: 'uppercase' }}>Shape:</span>
+              <button
+                type="button"
+                className="map-tool-btn"
+                title="Standard Rectangular / Gable Roof"
+                onClick={() => createAutoPolygon(currentCenterRef.current, 'rectangle')}
+              >
+                🏠 Standard
+              </button>
+              <button
+                type="button"
+                className="map-tool-btn"
+                title="L-Shape Roof Layout"
+                onClick={() => createAutoPolygon(currentCenterRef.current, 'l-shape')}
+              >
+                🏢 L-Shape
+              </button>
+              <button
+                type="button"
+                className="map-tool-btn"
+                title="T-Shape Roof Layout"
+                onClick={() => createAutoPolygon(currentCenterRef.current, 't-shape')}
+              >
+                🏛️ T-Shape
+              </button>
+            </div>
+
+            {/* ROTATION & SCALE TOOLS */}
+            <div className="map-tools" style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+              <button
+                type="button"
+                className="map-tool-btn"
+                title="Rotate boundary 15° counter-clockwise for angled roofs"
+                onClick={() => rotateCurrentPolygon(-15)}
+              >
+                🔄 Rotate -15°
+              </button>
+              <button
+                type="button"
+                className="map-tool-btn"
+                title="Rotate boundary 15° clockwise for angled roofs"
+                onClick={() => rotateCurrentPolygon(15)}
+              >
+                🔄 Rotate +15°
+              </button>
+              <button
+                type="button"
+                className="map-tool-btn"
+                title="Expand boundary size by 15%"
+                onClick={() => scaleCurrentPolygon(1.15)}
+              >
+                ➕ Expand Size
+              </button>
+              <button
+                type="button"
+                className="map-tool-btn"
+                title="Shrink boundary size by 15%"
+                onClick={() => scaleCurrentPolygon(0.85)}
+              >
+                ➖ Shrink Size
+              </button>
               <button type="button" className="map-tool-btn" onClick={recenterMap}>
-                🔄 Recenter Map
+                🎯 Recenter
               </button>
               <button type="button" className="map-tool-btn" onClick={clearShape}>
-                🗑️ Clear Shape
+                🗑️ Clear
               </button>
             </div>
           </>

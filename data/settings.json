@@ -10,19 +10,118 @@
   "aprRate": 12.99,
   "pricing": {
     "Silver": {
-      "name": "Silver Package",
+      "name": "SILVER",
       "targetPerSq": 525,
-      "ohioAdjustment": 50
+      "ohioAdjustment": 50,
+      "subtitle": "Essential protection",
+      "features": [
+        "3-year workmanship warranty",
+        "Atlas Pro-Lam shingles",
+        "F5 drip edge",
+        "Ice & water shield in valleys",
+        "2 OSB sheets included"
+      ],
+      "fullSpecs": [
+        {
+          "category": "Feature",
+          "detail": "More details goes here...."
+        }
+      ]
     },
     "Gold": {
-      "name": "Gold Package",
+      "name": "GOLD",
       "targetPerSq": 575,
-      "ohioAdjustment": 50
+      "ohioAdjustment": 50,
+      "subtitle": "Most Popular",
+      "features": [
+        "10-year workmanship warranty",
+        "Atlas Pinnacle Pristine + streak-free guarantee",
+        "F5 drip edge",
+        "Ice & water shield in valleys",
+        "3 OSB sheets included"
+      ],
+      "fullSpecs": [
+        {
+          "category": "Shingle System",
+          "detail": "Atlas Pinnacle® Pristine Architectural Shingles featuring Scotchgard™ Protector"
+        },
+        {
+          "category": "Warranty",
+          "detail": "10-Year Iron Horse Workmanship Warranty + Lifetime Algae Streak-Free Guarantee"
+        },
+        {
+          "category": "Underlayment",
+          "detail": "Premium High-Temp Synthetic Underlayment"
+        },
+        {
+          "category": "Ice & Water Shield",
+          "detail": "Heavy-Duty Ice & Water Shield in all valleys & critical leak zones"
+        },
+        {
+          "category": "Drip Edge & Metals",
+          "detail": "F5 Custom-Extruded Aluminum Drip Edge"
+        },
+        {
+          "category": "Ridge & Ventilation",
+          "detail": "Atlas HP Technology Ridge Vent & Pre-Cut Starter Shingles"
+        },
+        {
+          "category": "Decking Replacement",
+          "detail": "Up to 3 OSB Sheeting Replacement Panels included free"
+        },
+        {
+          "category": "Clean Up & Inspection",
+          "detail": "Full Magnetic Yard Sweep, Gutter Cleanout & Manager Sign-off"
+        }
+      ]
     },
     "Elite": {
-      "name": "IHR Elite",
+      "name": "IHR ELITE",
       "targetPerSq": 650,
-      "ohioAdjustment": 130
+      "ohioAdjustment": 130,
+      "subtitle": "Best Value & Maximum Protection",
+      "features": [
+        "Lifetime workmanship warranty",
+        "Atlas Pinnacle Pristine + streak-free guarantee",
+        "F8 drip edge",
+        "Ice & water shield at eaves and valleys",
+        "5 OSB sheets included",
+        "Permaboots"
+      ],
+      "fullSpecs": [
+        {
+          "category": "Shingle System",
+          "detail": "Atlas Pinnacle® Pristine Architectural Shingles with Scotchgard™ Protector"
+        },
+        {
+          "category": "Warranty",
+          "detail": "LIFETIME Iron Horse Workmanship Warranty + Premium Manufacturer System Warranty"
+        },
+        {
+          "category": "Underlayment",
+          "detail": "Commercial-Grade Heavyweight Synthetic Underlayment"
+        },
+        {
+          "category": "Ice & Water Shield",
+          "detail": "Full Eave & Valley Ice & Water Shield Protection (Complete Perimeter Seal)"
+        },
+        {
+          "category": "Drip Edge & Metals",
+          "detail": "F8 Oversized Drip Edge Flashing for maximum water shed"
+        },
+        {
+          "category": "Ridge & Ventilation",
+          "detail": "Atlas High-Performance Ridge Caps, Ridge Vents & Permaboots Pipe Flashing Seals"
+        },
+        {
+          "category": "Decking Replacement",
+          "detail": "Up to 5 OSB Sheeting Replacement Panels included free"
+        },
+        {
+          "category": "Clean Up & Inspection",
+          "detail": "VIP Magnetic Yard & Flowerbed Sweep, Gutter Wash & Executive QC Inspection"
+        }
+      ]
     }
   },
   "pitchMultipliers": {
@@ -32,5 +131,11 @@
     "steep": 1.25,
     "high": 1.41
   },
-  "termsAndConditions": "IRON HORSE ROOFING - TERMS & CONDITIONS \n\n1. AUTHORIZATION & SCOPE OF WORK\nBy accepting this proposal, Client authorizes Iron Horse Roofing (IHR) to perform the roof replacement or repair services as specified in the selected package. All work will be performed in accordance with manufacturer specifications, local building codes, and industry standards.\n\n2. PAYMENT & DEPOSIT REQUIREMENTS\n- For direct payments (Credit Card, ACH, or Apple Pay), a 50% deposit is required upon scheduling your project date, with the remaining 50% balance due immediately upon completion of the roofing installation.\n- For financed projects (GoodLeap or designated lending partners), formal loan approval must be finalized prior to material delivery and project commencement.\n\n3. PRE-EXISTING CONDITIONS & EXTRA OSB SHEETS\nAny unforeseen structural defects, decayed roof decking beyond the OSB sheet allowance included in your chosen package tier (Silver: 2 sheets, Gold: 3 sheets, Elite: 5 sheets), or hidden architectural damage discovered during tear-off will be documented and reviewed with Client prior to performing additional repairs.\n\n4. WARRANTY & WORKMANSHIP\nWorkmanship warranties are provided by Iron Horse Roofing according to the package selected (Silver: 3-Year, Gold: 10-Year, Elite: Lifetime). Shingle product warranties are provided directly by Atlas Roofing Corporation.\n\n5. PROPERTY ACCESS & PREPARATION\nClient agrees to provide reasonable driveway access and property clearance for crew vehicles, dumpsters, and material delivery during scheduled installation dates. Iron Horse Roofing will exercise extreme care to protect landscaping and property.\n\n6. CANCELLATION & REFUNDS\nOrders cancelled after material dispatch or within 48 hours of scheduled installation date may be subject to material restocking fees."
+  "termsAndConditions": "IRON HORSE ROOFING - TERMS & CONDITIONS \n\n1. AUTHORIZATION & SCOPE OF WORK\nBy accepting this proposal, Client authorizes Iron Horse Roofing (IHR) to perform the roof replacement or repair services as specified in the selected package. All work will be performed in accordance with manufacturer specifications, local building codes, and industry standards.\n\n2. PAYMENT & DEPOSIT REQUIREMENTS\n- For direct payments (Credit Card, ACH, or Apple Pay), a 50% deposit is required upon scheduling your project date, with the remaining 50% balance due immediately upon completion of the roofing installation.\n- For financed projects (GoodLeap or designated lending partners), formal loan approval must be finalized prior to material delivery and project commencement.\n\n3. PRE-EXISTING CONDITIONS & EXTRA OSB SHEETS\nAny unforeseen structural defects, decayed roof decking beyond the OSB sheet allowance included in your chosen package tier (Silver: 2 sheets, Gold: 3 sheets, Elite: 5 sheets), or hidden architectural damage discovered during tear-off will be documented and reviewed with Client prior to performing additional repairs.\n\n4. WARRANTY & WORKMANSHIP\nWorkmanship warranties are provided by Iron Horse Roofing according to the package selected (Silver: 3-Year, Gold: 10-Year, Elite: Lifetime). Shingle product warranties are provided directly by Atlas Roofing Corporation.\n\n5. PROPERTY ACCESS & PREPARATION\nClient agrees to provide reasonable driveway access and property clearance for crew vehicles, dumpsters, and material delivery during scheduled installation dates. Iron Horse Roofing will exercise extreme care to protect landscaping and property.\n\n6. CANCELLATION & REFUNDS\nOrders cancelled after material dispatch or within 48 hours of scheduled installation date may be subject to material restocking fees.",
+  "goodleapEnabled": true,
+  "goodleapEnv": "sandbox",
+  "goodleapOrgId": "loanpal",
+  "goodleapOrgKey": "Cle@nEnergy!",
+  "goodleapCategoryId": "",
+  "goodleapPromotionId": ""
 }

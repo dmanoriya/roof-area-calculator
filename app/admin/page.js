@@ -27,7 +27,7 @@ export default function AdminPage() {
   const [leadStatus, setLeadStatus] = useState('New Lead');
   const [leadNotes, setLeadNotes] = useState('');
 
-  const [apiKey, setApiKey] = useState('AIzaSyDbQLFiIpLz8w3ZXYaC7BKA7YlUiBCFzPA');
+  const [apiKey, setApiKey] = useState('AIzaSyAusNwdN9zPqXJ_doW_M4mbdrhtJkZkdpU');
   const [priceSilver, setPriceSilver] = useState(525);
   const [priceGold, setPriceGold] = useState(575);
   const [priceElite, setPriceElite] = useState(650);
@@ -35,6 +35,27 @@ export default function AdminPage() {
   const [ohioGold, setOhioGold] = useState(50);
   const [ohioElite, setOhioElite] = useState(130);
   const [aprRate, setAprRate] = useState(12.99);
+
+  // Package Subtitles, Features & Specs Editor States
+  const [pkgSilverSubtitle, setPkgSilverSubtitle] = useState('Essential protection');
+  const [pkgSilverFeaturesText, setPkgSilverFeaturesText] = useState("3-year workmanship warranty\nAtlas Pro-Lam shingles\nF5 drip edge\nIce & water shield in valleys\n2 OSB sheets included");
+  const [pkgSilverSpecsText, setPkgSilverSpecsText] = useState("Shingle System: Atlas Pro-Lam Architectural Shingles (Class A Fire Rating)\nWarranty: 3-Year Iron Horse Workmanship Warranty + Atlas 30-Yr Limited Warranty\nUnderlayment: Synthetic Water-Resistant Underlayment across full deck\nIce & Water Shield: Self-adhering membrane installed in all valleys\nDrip Edge & Metals: F5 Heavy-Duty Aluminum Drip Edge on all eaves & rakes\nRidge & Ventilation: High-Flow Ridge Vent & Starter Shingles along perimeter\nDecking Replacement: Up to 2 OSB Sheeting Replacement Panels included free\nClean Up & Inspection: Full Magnetic Nail Sweep & Final Quality Control Walkthrough");
+
+  const [pkgGoldSubtitle, setPkgGoldSubtitle] = useState('Most Popular');
+  const [pkgGoldFeaturesText, setPkgGoldFeaturesText] = useState("10-year workmanship warranty\nAtlas Pinnacle Pristine + streak-free guarantee\nF5 drip edge\nIce & water shield in valleys\n3 OSB sheets included");
+  const [pkgGoldSpecsText, setPkgGoldSpecsText] = useState("Shingle System: Atlas Pinnacle® Pristine Architectural Shingles featuring Scotchgard™ Protector\nWarranty: 10-Year Iron Horse Workmanship Warranty + Lifetime Algae Streak-Free Guarantee\nUnderlayment: Premium High-Temp Synthetic Underlayment\nIce & Water Shield: Heavy-Duty Ice & Water Shield in all valleys & critical leak zones\nDrip Edge & Metals: F5 Custom-Extruded Aluminum Drip Edge\nRidge & Ventilation: Atlas HP Technology Ridge Vent & Pre-Cut Starter Shingles\nDecking Replacement: Up to 3 OSB Sheeting Replacement Panels included free\nClean Up & Inspection: Full Magnetic Yard Sweep, Gutter Cleanout & Manager Sign-off");
+
+  const [pkgEliteSubtitle, setPkgEliteSubtitle] = useState('Best Value & Maximum Protection');
+  const [pkgEliteFeaturesText, setPkgEliteFeaturesText] = useState("Lifetime workmanship warranty\nAtlas Pinnacle Pristine + streak-free guarantee\nF8 drip edge\nIce & water shield at eaves and valleys\n5 OSB sheets included\nPermaboots");
+  const [pkgEliteSpecsText, setPkgEliteSpecsText] = useState("Shingle System: Atlas Pinnacle® Pristine Architectural Shingles with Scotchgard™ Protector\nWarranty: LIFETIME Iron Horse Workmanship Warranty + Premium Manufacturer System Warranty\nUnderlayment: Commercial-Grade Heavyweight Synthetic Underlayment\nIce & Water Shield: Full Eave & Valley Ice & Water Shield Protection (Complete Perimeter Seal)\nDrip Edge & Metals: F8 Oversized Drip Edge Flashing for maximum water shed\nRidge & Ventilation: Atlas High-Performance Ridge Caps, Ridge Vents & Permaboots Pipe Flashing Seals\nDecking Replacement: Up to 5 OSB Sheeting Replacement Panels included free\nClean Up & Inspection: VIP Magnetic Yard & Flowerbed Sweep, Gutter Wash & Executive QC Inspection");
+  const [goodleapEnabled, setGoodleapEnabled] = useState(true);
+  const [goodleapEnv, setGoodleapEnv] = useState('sandbox');
+  const [goodleapOrgId, setGoodleapOrgId] = useState('loanpal');
+  const [goodleapOrgKey, setGoodleapOrgKey] = useState('Cle@nEnergy!');
+  const [goodleapCategoryId, setGoodleapCategoryId] = useState('');
+  const [goodleapPromotionId, setGoodleapPromotionId] = useState('');
+  const [isTestingGoodleap, setIsTestingGoodleap] = useState(false);
+  const [goodleapTestResult, setGoodleapTestResult] = useState(null);
   const [termsContent, setTermsContent] = useState('');
   const [isFullscreenTermsEditor, setIsFullscreenTermsEditor] = useState(false);
   const [isTermsPreviewOpen, setIsTermsPreviewOpen] = useState(false);
@@ -154,6 +175,30 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
         setOhioGold(data.settings.goldOhioAdj ?? 50);
         setOhioElite(data.settings.eliteOhioAdj ?? 130);
         setAprRate(data.settings.aprRate ?? 12.99);
+        setGoodleapEnabled(data.settings.goodleapEnabled !== false);
+        setGoodleapEnv(data.settings.goodleapEnv || 'sandbox');
+        setGoodleapOrgId(data.settings.goodleapOrgId || 'loanpal');
+        setGoodleapOrgKey(data.settings.goodleapOrgKey || 'Cle@nEnergy!');
+        setGoodleapCategoryId(data.settings.goodleapCategoryId || '');
+        setGoodleapPromotionId(data.settings.goodleapPromotionId || '');
+        if (data.settings.pricing) {
+          const pr = data.settings.pricing;
+          if (pr.Silver) {
+            if (pr.Silver.subtitle) setPkgSilverSubtitle(pr.Silver.subtitle);
+            if (Array.isArray(pr.Silver.features)) setPkgSilverFeaturesText(pr.Silver.features.join('\n'));
+            if (Array.isArray(pr.Silver.fullSpecs)) setPkgSilverSpecsText(pr.Silver.fullSpecs.map(s => `${s.category}: ${s.detail}`).join('\n'));
+          }
+          if (pr.Gold) {
+            if (pr.Gold.subtitle) setPkgGoldSubtitle(pr.Gold.subtitle);
+            if (Array.isArray(pr.Gold.features)) setPkgGoldFeaturesText(pr.Gold.features.join('\n'));
+            if (Array.isArray(pr.Gold.fullSpecs)) setPkgGoldSpecsText(pr.Gold.fullSpecs.map(s => `${s.category}: ${s.detail}`).join('\n'));
+          }
+          if (pr.Elite) {
+            if (pr.Elite.subtitle) setPkgEliteSubtitle(pr.Elite.subtitle);
+            if (Array.isArray(pr.Elite.features)) setPkgEliteFeaturesText(pr.Elite.features.join('\n'));
+            if (Array.isArray(pr.Elite.fullSpecs)) setPkgEliteSpecsText(pr.Elite.fullSpecs.map(s => `${s.category}: ${s.detail}`).join('\n'));
+          }
+        }
         if (data.settings.termsAndConditions) {
           setTermsContent(data.settings.termsAndConditions);
         }
@@ -161,6 +206,35 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
     } catch (err) {
       console.error('Error fetching settings:', err);
     }
+  };
+
+  const handleTestGoodleap = async () => {
+    setIsTestingGoodleap(true);
+    setGoodleapTestResult(null);
+    try {
+      const res = await fetch('/api/goodleap?action=testConnection');
+      const data = await res.json();
+      if (data.success) {
+        setGoodleapTestResult({ success: true, message: data.message, categories: data.categories });
+      } else {
+        setGoodleapTestResult({ success: false, message: data.error || 'Connection failed' });
+      }
+    } catch (err) {
+      setGoodleapTestResult({ success: false, message: err.message || 'Connection error' });
+    } finally {
+      setIsTestingGoodleap(false);
+    }
+  };
+
+  const parseSpecsText = (text) => {
+    if (!text || !text.trim()) return [];
+    return text.split('\n').map(line => {
+      const parts = line.split(':');
+      if (parts.length > 1) {
+        return { category: parts[0].trim(), detail: parts.slice(1).join(':').trim() };
+      }
+      return { category: 'Feature', detail: line.trim() };
+    }).filter(item => item.detail);
   };
 
   const handleSaveSettings = async () => {
@@ -173,7 +247,39 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
         goldOhioAdj: Number(ohioGold),
         eliteOhioAdj: Number(ohioElite),
         aprRate: Number(aprRate),
-        termsAndConditions: termsContent
+        goodleapEnabled,
+        goodleapEnv,
+        goodleapOrgId,
+        goodleapOrgKey,
+        goodleapCategoryId,
+        goodleapPromotionId,
+        termsAndConditions: termsContent,
+        pricing: {
+          Silver: {
+            name: 'SILVER',
+            subtitle: pkgSilverSubtitle,
+            targetPerSq: Number(priceSilver),
+            ohioAdjustment: Number(ohioSilver),
+            features: pkgSilverFeaturesText.split('\n').map(s => s.trim()).filter(Boolean),
+            fullSpecs: parseSpecsText(pkgSilverSpecsText)
+          },
+          Gold: {
+            name: 'GOLD',
+            subtitle: pkgGoldSubtitle,
+            targetPerSq: Number(priceGold),
+            ohioAdjustment: Number(ohioGold),
+            features: pkgGoldFeaturesText.split('\n').map(s => s.trim()).filter(Boolean),
+            fullSpecs: parseSpecsText(pkgGoldSpecsText)
+          },
+          Elite: {
+            name: 'IHR ELITE',
+            subtitle: pkgEliteSubtitle,
+            targetPerSq: Number(priceElite),
+            ohioAdjustment: Number(ohioElite),
+            features: pkgEliteFeaturesText.split('\n').map(s => s.trim()).filter(Boolean),
+            fullSpecs: parseSpecsText(pkgEliteSpecsText)
+          }
+        }
       };
 
       if (isApiKeyUnlocked && apiKey) {
@@ -579,6 +685,14 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
                   📈 Pitch &amp; Waste: <strong>{activeLead.pitch} pitch ({activeLead.waste}% waste)</strong><br />
                   💳 Payment Terms: <strong>{getPaymentLabel(activeLead.paymentMethod)}</strong>
                   {activeLead.monthlyPayment ? <span style={{ color: 'var(--accent-blue)', fontWeight: 700 }}> (${activeLead.monthlyPayment}/mo)</span> : ''}<br />
+                  {activeLead.goodleapLoanId && (
+                    <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '8px', padding: '8px 12px', margin: '8px 0', fontSize: '0.85rem' }}>
+                      <strong style={{ color: '#1e40af' }}>⚡ GoodLeap Loan Approval:</strong><br />
+                      • Status: <span style={{ fontWeight: 700, color: activeLead.goodleapStatus === 'APPROVED' ? '#15803d' : '#b45309' }}>{activeLead.goodleapStatus || 'APPROVED'}</span><br />
+                      • Loan ID: <code>{activeLead.goodleapLoanId}</code><br />
+                      {activeLead.goodleapRefNum && <span>• Ref #: <code>{activeLead.goodleapRefNum}</code><br /></span>}
+                    </div>
+                  )}
                   💰 Total Contract Price: <strong style={{ color: 'var(--primary-red)', fontSize: '1.15rem' }}>${(activeLead.totalAmount || 0).toLocaleString()}</strong>
                 </div>
               </div>
@@ -720,47 +834,221 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
               </div>
             </div>
 
-            <div className="form-section-head">2. Ohio State Price Surcharges (+$ / Square)</div>
-            <div className="form-grid-3" style={{ marginBottom: '20px' }}>
-              <div className="form-group">
-                <label className="form-label">Silver OH Surcharge (+$)</label>
+            <div className="form-section-head">2. Package Details, Subtitles &amp; View More Specs Editor</div>
+            
+            {/* SILVER PACKAGE EDITOR */}
+            <div style={{ background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '12px', padding: '16px', marginBottom: '16px' }}>
+              <h4 style={{ color: '#334155', marginBottom: '12px', fontWeight: 800 }}>🥈 SILVER PACKAGE EDITING</h4>
+              <div className="form-group" style={{ marginBottom: '12px' }}>
+                <label className="form-label">Silver Subtitle</label>
                 <input
-                  type="number"
+                  type="text"
                   className="form-input"
-                  value={ohioSilver}
-                  onChange={e => setOhioSilver(e.target.value)}
+                  value={pkgSilverSubtitle}
+                  onChange={e => setPkgSilverSubtitle(e.target.value)}
+                />
+              </div>
+              <div className="form-group" style={{ marginBottom: '12px' }}>
+                <label className="form-label">Main Bullet Features (1 per line)</label>
+                <textarea
+                  className="form-textarea"
+                  rows={4}
+                  value={pkgSilverFeaturesText}
+                  onChange={e => setPkgSilverFeaturesText(e.target.value)}
                 />
               </div>
               <div className="form-group">
-                <label className="form-label">Gold OH Surcharge (+$)</label>
-                <input
-                  type="number"
-                  className="form-input"
-                  value={ohioGold}
-                  onChange={e => setOhioGold(e.target.value)}
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Elite OH Surcharge (+$)</label>
-                <input
-                  type="number"
-                  className="form-input"
-                  value={ohioElite}
-                  onChange={e => setOhioElite(e.target.value)}
+                <label className="form-label">"View More" Full Specifications (Format: Category: Detail)</label>
+                <textarea
+                  className="form-textarea"
+                  rows={6}
+                  value={pkgSilverSpecsText}
+                  onChange={e => setPkgSilverSpecsText(e.target.value)}
                 />
               </div>
             </div>
 
-            <div className="form-section-head">3. Financing Interest Rate (% APR)</div>
-            <div className="form-group" style={{ marginBottom: '20px' }}>
-              <label className="form-label">GoodLeap Financing APR (%)</label>
-              <input
-                type="number"
-                step="0.01"
-                className="form-input"
-                value={aprRate}
-                onChange={e => setAprRate(e.target.value)}
-              />
+            {/* GOLD PACKAGE EDITOR */}
+            <div style={{ background: '#fefce8', border: '1px solid #fef08a', borderRadius: '12px', padding: '16px', marginBottom: '16px' }}>
+              <h4 style={{ color: '#854d0e', marginBottom: '12px', fontWeight: 800 }}>🥇 GOLD PACKAGE EDITING</h4>
+              <div className="form-group" style={{ marginBottom: '12px' }}>
+                <label className="form-label">Gold Subtitle</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={pkgGoldSubtitle}
+                  onChange={e => setPkgGoldSubtitle(e.target.value)}
+                />
+              </div>
+              <div className="form-group" style={{ marginBottom: '12px' }}>
+                <label className="form-label">Main Bullet Features (1 per line)</label>
+                <textarea
+                  className="form-textarea"
+                  rows={4}
+                  value={pkgGoldFeaturesText}
+                  onChange={e => setPkgGoldFeaturesText(e.target.value)}
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">"View More" Full Specifications (Format: Category: Detail)</label>
+                <textarea
+                  className="form-textarea"
+                  rows={6}
+                  value={pkgGoldSpecsText}
+                  onChange={e => setPkgGoldSpecsText(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* ELITE PACKAGE EDITOR */}
+            <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '12px', padding: '16px', marginBottom: '20px' }}>
+              <h4 style={{ color: '#991b1b', marginBottom: '12px', fontWeight: 800 }}>👑 IHR ELITE PACKAGE EDITING</h4>
+              <div className="form-group" style={{ marginBottom: '12px' }}>
+                <label className="form-label">Elite Subtitle</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={pkgEliteSubtitle}
+                  onChange={e => setPkgEliteSubtitle(e.target.value)}
+                />
+              </div>
+              <div className="form-group" style={{ marginBottom: '12px' }}>
+                <label className="form-label">Main Bullet Features (1 per line)</label>
+                <textarea
+                  className="form-textarea"
+                  rows={4}
+                  value={pkgEliteFeaturesText}
+                  onChange={e => setPkgEliteFeaturesText(e.target.value)}
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">"View More" Full Specifications (Format: Category: Detail)</label>
+                <textarea
+                  className="form-textarea"
+                  rows={6}
+                  value={pkgEliteSpecsText}
+                  onChange={e => setPkgEliteSpecsText(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="form-section-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>3. GoodLeap API &amp; Financing Settings</span>
+              <span style={{ fontSize: '0.8rem', background: goodleapEnabled ? '#dcfce7' : '#f1f5f9', color: goodleapEnabled ? '#166534' : '#64748b', padding: '2px 8px', borderRadius: '12px', fontWeight: 700 }}>
+                {goodleapEnabled ? '● GoodLeap Active' : '○ Disabled'}
+              </span>
+            </div>
+
+            <div style={{ background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '14px', padding: '16px', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 700, fontSize: '0.92rem', color: '#0f172a' }}>
+                  <input
+                    type="checkbox"
+                    checked={goodleapEnabled}
+                    onChange={e => setGoodleapEnabled(e.target.checked)}
+                    style={{ width: '18px', height: '18px', accentColor: 'var(--primary-red)' }}
+                  />
+                  Enable GoodLeap API Integration
+                </label>
+              </div>
+
+              <div className="form-grid-3" style={{ marginBottom: '16px' }}>
+                <div className="form-group">
+                  <label className="form-label">API Environment</label>
+                  <select
+                    className="form-input"
+                    value={goodleapEnv}
+                    onChange={e => setGoodleapEnv(e.target.value)}
+                    style={{ fontWeight: 600 }}
+                  >
+                    <option value="sandbox">Sandbox (Testing)</option>
+                    <option value="production">Production (Live)</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">API Key ID (Basic Auth Username)</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={goodleapOrgId}
+                    onChange={e => setGoodleapOrgId(e.target.value)}
+                    placeholder="Enter API Key ID..."
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">API Key Secret (Basic Auth Password)</label>
+                  <input
+                    type="password"
+                    className="form-input"
+                    value={goodleapOrgKey}
+                    onChange={e => setGoodleapOrgKey(e.target.value)}
+                    placeholder="Enter API Key Secret..."
+                  />
+                </div>
+              </div>
+              
+              <div style={{ fontSize: '0.78rem', color: '#64748b', marginBottom: '14px', background: '#f1f5f9', padding: '8px 12px', borderRadius: '8px' }}>
+                💡 <strong>Note:</strong> Enter your GoodLeap <strong>API Key ID</strong> &amp; <strong>API Key Secret</strong> issued in your <a href="https://developer.goodleap.com" target="_blank" rel="noreferrer" style={{ color: '#1e40af', fontWeight: 700 }}>GoodLeap Developer Portal</a> or API setup email (not your developer portal website password).
+              </div>
+
+              <div className="form-grid-2" style={{ marginBottom: '16px' }}>
+                <div className="form-group">
+                  <label className="form-label">Default Category ID (Optional)</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={goodleapCategoryId}
+                    onChange={e => setGoodleapCategoryId(e.target.value)}
+                    placeholder="Leave blank to auto-detect"
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Fallback APR (%) Formula Rate</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    className="form-input"
+                    value={aprRate}
+                    onChange={e => setAprRate(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={handleTestGoodleap}
+                  disabled={isTestingGoodleap}
+                  style={{
+                    padding: '8px 16px',
+                    background: '#0f172a',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontWeight: 700,
+                    fontSize: '0.85rem',
+                    cursor: isTestingGoodleap ? 'not-allowed' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  {isTestingGoodleap ? 'Testing API...' : '⚡ Test GoodLeap Connection'}
+                </button>
+                {goodleapTestResult && (
+                  <div style={{
+                    fontSize: '0.85rem',
+                    fontWeight: 600,
+                    color: goodleapTestResult.success ? '#15803d' : '#b91c1c',
+                    background: goodleapTestResult.success ? '#f0fdf4' : '#fef2f2',
+                    padding: '6px 12px',
+                    borderRadius: '8px',
+                    border: `1px solid ${goodleapTestResult.success ? '#bbf7d0' : '#fecaca'}`
+                  }}>
+                    {goodleapTestResult.success ? '✅ ' : '❌ '}{goodleapTestResult.message}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="form-section-head">4. Security &amp; Admin Password</div>

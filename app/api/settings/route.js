@@ -6,7 +6,7 @@ const DATA_DIR = path.join(process.cwd(), 'data');
 const SETTINGS_FILE = path.join(DATA_DIR, 'settings.json');
 
 const DEFAULT_SETTINGS = {
-  apiKey: process.env.GOOGLE_MAPS_API_KEY || 'AIzaSyDbQLFiIpLz8w3ZXYaC7BKA7YlUiBCFzPA',
+  apiKey: process.env.GOOGLE_MAPS_API_KEY || 'AIzaSyAusNwdN9zPqXJ_doW_M4mbdrhtJkZkdpU',
   adminPassword: process.env.ADMIN_PASSWORD || 'admin',
   silverPerSq: 525,
   goldPerSq: 575,
@@ -46,7 +46,13 @@ Workmanship warranties are provided by Iron Horse Roofing according to the packa
 Client agrees to provide reasonable driveway access and property clearance for crew vehicles, dumpsters, and material delivery during scheduled installation dates. Iron Horse Roofing will exercise extreme care to protect landscaping and property.
 
 6. CANCELLATION & REFUNDS
-Orders cancelled after material dispatch or within 48 hours of scheduled installation date may be subject to material restocking fees.`
+Orders cancelled after material dispatch or within 48 hours of scheduled installation date may be subject to material restocking fees.`,
+  goodleapEnabled: true,
+  goodleapEnv: 'sandbox',
+  goodleapOrgId: 'loanpal',
+  goodleapOrgKey: 'Cle@nEnergy!',
+  goodleapCategoryId: '',
+  goodleapPromotionId: ''
 };
 
 function readSettings() {
@@ -102,10 +108,14 @@ export async function POST(req) {
       silverOhioAdj,
       goldOhioAdj,
       eliteOhioAdj,
-      pricing: {
-        Silver: { name: 'Silver Package', targetPerSq: silverPerSq, ohioAdjustment: silverOhioAdj },
-        Gold: { name: 'Gold Package', targetPerSq: goldPerSq, ohioAdjustment: goldOhioAdj },
-        Elite: { name: 'IHR Elite', targetPerSq: elitePerSq, ohioAdjustment: eliteOhioAdj }
+      pricing: body.pricing ? {
+        Silver: { name: 'SILVER', targetPerSq: silverPerSq, ohioAdjustment: silverOhioAdj, ...body.pricing.Silver },
+        Gold: { name: 'GOLD', targetPerSq: goldPerSq, ohioAdjustment: goldOhioAdj, ...body.pricing.Gold },
+        Elite: { name: 'IHR ELITE', targetPerSq: elitePerSq, ohioAdjustment: eliteOhioAdj, ...body.pricing.Elite }
+      } : {
+        Silver: { name: 'SILVER', targetPerSq: silverPerSq, ohioAdjustment: silverOhioAdj },
+        Gold: { name: 'GOLD', targetPerSq: goldPerSq, ohioAdjustment: goldOhioAdj },
+        Elite: { name: 'IHR ELITE', targetPerSq: elitePerSq, ohioAdjustment: eliteOhioAdj }
       }
     };
 

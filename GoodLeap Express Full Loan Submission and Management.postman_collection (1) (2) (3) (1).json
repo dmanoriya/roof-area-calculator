@@ -1,0 +1,700 @@
+{
+	"info": {
+		"_postman_id": "bfaa0959-73b5-45c5-b095-b39aa5ab5136",
+		"name": "Full Loan Submission and Management",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26853724",
+		"_collection_link": "https://loanpalapidocuments.postman.co/workspace/CustomerSuccessShareable~3bae0cc0-4ee3-4165-9f8b-18b830d95a19/collection/24963954-bfaa0959-73b5-45c5-b095-b39aa5ab5136?action=share&creator=26853724&source=collection_link"
+	},
+	"item": [
+		{
+			"name": "Pre Submission",
+			"item": [
+				{
+					"name": "Get Install Categories",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const { id } = JSON.parse(responseBody).find(({ name }) => name === pm.environment.get('devapi-icat'));\r",
+									"pm.environment.set('devapi-icatid', id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{devapi-baseurl-v2}}/categories",
+							"host": [
+								"{{devapi-baseurl-v2}}"
+							],
+							"path": [
+								"categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Channels",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{devapi-baseurl-v2}}/channels",
+							"host": [
+								"{{devapi-baseurl-v2}}"
+							],
+							"path": [
+								"channels"
+							],
+							"query": [
+								{
+									"key": "states[0]",
+									"value": "TX",
+									"disabled": true
+								},
+								{
+									"key": "states[1]",
+									"value": "CA",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Promotions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const { id } = JSON.parse(responseBody).data.find(({ name }) => name === 'ACH');",
+									"pm.environment.set('devapi-achpromotionid', id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{devapi-baseurl-v2}}/promotions",
+							"host": [
+								"{{devapi-baseurl-v2}}"
+							],
+							"path": [
+								"promotions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Loan Offers",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const parsedResponse = JSON.parse(responseBody);",
+									"const offerId1 = parsedResponse.data[0].id;",
+									"const offerId2 = parsedResponse.data[1].id;",
+									"pm.environment.set('devapi-offerid1', offerId1);",
+									"pm.environment.set('devapi-offerid2', offerId2);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{devapi-baseurl-v2}}/offers?promotionIds[]={{devapi-achpromotionid}}&categoryId={{devapi-icatid}}",
+							"host": [
+								"{{devapi-baseurl-v2}}"
+							],
+							"path": [
+								"offers"
+							],
+							"query": [
+								{
+									"key": "loanId",
+									"value": "{{devapi-currentloanid}}",
+									"description": "Get available offers for an existing loan (if wanting to perform a change order)",
+									"disabled": true
+								},
+								{
+									"key": "promotionIds[]",
+									"value": "{{devapi-achpromotionid}}",
+									"description": "Autopay promotion"
+								},
+								{
+									"key": "states[]",
+									"value": "CA",
+									"disabled": true
+								},
+								{
+									"key": "categoryId",
+									"value": "{{devapi-icatid}}"
+								},
+								{
+									"key": "channels[]",
+									"value": "Admin",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Payments (Loan Calculator)",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{devapi-baseurl-v2}}/payments?promotionIds[]={{devapi-achpromotionid}}&amount=20485.55&offerIds[0]={{devapi-offerid1}}&offerIds[1]={{devapi-offerid2}}",
+							"host": [
+								"{{devapi-baseurl-v2}}"
+							],
+							"path": [
+								"payments"
+							],
+							"query": [
+								{
+									"key": "promotionIds[]",
+									"value": "{{devapi-achpromotionid}}",
+									"description": "Autopay promotion"
+								},
+								{
+									"key": "amount",
+									"value": "20485.55"
+								},
+								{
+									"key": "offerIds[0]",
+									"value": "{{devapi-offerid1}}"
+								},
+								{
+									"key": "offerIds[1]",
+									"value": "{{devapi-offerid2}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Submission",
+			"item": [
+				{
+					"name": "Submit Loan Application",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const address = pm.environment.get('devapi-appaddress');\r",
+									"const [numStr,...rest] = address.split(' ');\r",
+									"const number = Number.parseInt(numStr);\r",
+									"const newAddress = [ number+1, ...rest].join(' ');\r",
+									"\r",
+									"pm.environment.set('devapi-appaddress', newAddress);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const parsedResponse = JSON.parse(responseBody);",
+									"const loanId = parsedResponse.id;",
+									"pm.environment.set('devapi-currentloanid', loanId);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"applicant\": {\r\n        \"firstName\": \"Test\",\r\n        \"lastName\": \"Borrower\",\r\n        \"address\": {\r\n            \"street\": \"{{devapi-appaddress}}\",\r\n            \"city\": \"Rocklin\",\r\n            \"state\": \"CA\",\r\n            \"zip\": \"95765\"\r\n        },\r\n        \"ssn\": \"0101\",\r\n        \"email\": \"{{devapi-borroweremail}}\",\r\n        \"annualIncome\": {\r\n            \"type\": \"USD\",\r\n            \"value\": 500000\r\n        },\r\n        \"citizenshipStatus\": \"US_CITIZEN\",\r\n        \"dob\": \"1970-01-01\",\r\n        \"electronicConsent\": true,\r\n        \"employer\": \"GoodLeap\",\r\n        \"employmentStatus\": \"EMPLOYED\",\r\n        \"employmentDuration\": 25,\r\n        \"homeOccupancy\": \"PRIMARY\",\r\n        \"homeOwnership\": \"OWNED_WITH_MORTGAGE\",\r\n        \"occupation\": \"Developer\",\r\n        \"primaryPhoneNumber\": {\r\n            \"value\": \"8013623378\",\r\n            \"type\": \"MOBILE\"\r\n        },\r\n        \"spokenLanguage\": \"ENGLISH\"\r\n    },\r\n    \"categoryId\": \"{{devapi-icatid}}\",\r\n    \"submittingUser\": {\r\n        \"firstName\": \"Submitting\",\r\n        \"lastName\": \"User\",\r\n        \"email\": \"{{devapi-submittinguser}}\"\r\n    },\r\n    \"offerId\": \"{{devapi-offerid1}}\",\r\n    \"amount\": {\r\n        \"value\": 20485.55,\r\n        \"type\": \"USD\"\r\n    },\r\n    \"applicantSignature\": \"{{devapi-signaturedata}}\",\r\n    \"subjectProperty\": {\r\n        \"address\": {\r\n            \"street\": \"{{devapi-appaddress}}\",\r\n            \"city\": \"Rocklin\",\r\n            \"state\": \"CA\",\r\n            \"zip\": \"95765\"\r\n        },\r\n        \"mortgageTotalBalances\": {\r\n            \"type\": \"USD\",\r\n            \"value\": \"200000\"\r\n        },\r\n        \"mortgageTotalPayments\": {\r\n            \"type\": \"USD\",\r\n            \"value\": \"1250\"\r\n        },\r\n        \"isMobileOrManufacturedHome\": false\r\n    },\r\n    \"referenceNumber\": \"{{devapi-referencenumber}}\",\r\n    \"disclosureToken\": \"{{devapi-disclosuretoken}}\",\r\n    \"enrollments\": [\r\n        \"AUTOPAY\"\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{devapi-baseurl-v2}}/loans",
+							"host": [
+								"{{devapi-baseurl-v2}}"
+							],
+							"path": [
+								"loans"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Post Submission",
+			"item": [
+				{
+					"name": "Get Loan By Id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{devapi-baseurl-v2}}/loans/:loanId",
+							"host": [
+								"{{devapi-baseurl-v2}}"
+							],
+							"path": [
+								"loans",
+								":loanId"
+							],
+							"variable": [
+								{
+									"key": "loanId",
+									"value": "{{devapi-currentloanid}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Loans By Reference Number",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{devapi-baseurl-v2}}/loans?referenceNumber={{devapi-referencenumber}}",
+							"host": [
+								"{{devapi-baseurl-v2}}"
+							],
+							"path": [
+								"loans"
+							],
+							"query": [
+								{
+									"key": "referenceNumber",
+									"value": "{{devapi-referencenumber}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Loan Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{devapi-baseurl-v2}}/loans/:loanId/status",
+							"host": [
+								"{{devapi-baseurl-v2}}"
+							],
+							"path": [
+								"loans",
+								":loanId",
+								"status"
+							],
+							"variable": [
+								{
+									"key": "loanId",
+									"value": "{{devapi-currentloanid}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Category Components",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{devapi-baseurl-v2}}/categories/:categoryId/components",
+							"host": [
+								"{{devapi-baseurl-v2}}"
+							],
+							"path": [
+								"categories",
+								":categoryId",
+								"components"
+							],
+							"variable": [
+								{
+									"key": "categoryId",
+									"value": "{{devapi-icatid}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Request Loan Docs",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"signingStrategy\": \"REMOTE\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{devapi-baseurl-v2}}/loans/:loanId/documents",
+							"host": [
+								"{{devapi-baseurl-v2}}"
+							],
+							"path": [
+								"loans",
+								":loanId",
+								"documents"
+							],
+							"variable": [
+								{
+									"key": "loanId",
+									"value": "{{devapi-currentloanid}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Cases",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const parsedResponse = JSON.parse(responseBody);",
+									"if (parsedResponse.length < 1) {",
+									"    pm.environment.set('devapi-currentcaseid', \"\");",
+									"} else {",
+									"    const caseId = parsedResponse[0].id;",
+									"    pm.environment.set('devapi-currentcaseid', caseId);",
+									"}",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{devapi-baseurl-v2}}/loans/:loanId/cases",
+							"host": [
+								"{{devapi-baseurl-v2}}"
+							],
+							"path": [
+								"loans",
+								":loanId",
+								"cases"
+							],
+							"variable": [
+								{
+									"key": "loanId",
+									"value": "{{devapi-currentloanid}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get a Case Upload URL",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const caseResponse = JSON.parse(responseBody);",
+									"const uploadUrl = caseResponse.uploadUrl;",
+									"pm.environment.set('devapi-caseuploadurl', uploadUrl);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{devapi-baseurl-v2}}/loans/:loanId/cases/:caseId/uploadurl?docType=DRIVERS_LICENSE",
+							"host": [
+								"{{devapi-baseurl-v2}}"
+							],
+							"path": [
+								"loans",
+								":loanId",
+								"cases",
+								":caseId",
+								"uploadurl"
+							],
+							"query": [
+								{
+									"key": "docType",
+									"value": "DRIVERS_LICENSE"
+								}
+							],
+							"variable": [
+								{
+									"key": "loanId",
+									"value": "{{devapi-currentloanid}}"
+								},
+								{
+									"key": "caseId",
+									"value": "{{devapi-currentcaseid}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Upload a File to a Case Upload URL",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "file",
+							"file": {}
+						},
+						"url": {
+							"raw": "{{devapi-caseuploadurl}}",
+							"host": [
+								"{{devapi-caseuploadurl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Install Complete",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"INSTALL_COMPLETE\",\n  \"completedAt\": \"2023-06-13T19:42:03.050Z\" // defaults to today if not supplied\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{devapi-baseurl-v2}}/loans/:loanId/milestones",
+							"host": [
+								"{{devapi-baseurl-v2}}"
+							],
+							"path": [
+								"loans",
+								":loanId",
+								"milestones"
+							],
+							"variable": [
+								{
+									"key": "loanId",
+									"value": "{{devapi-currentloanid}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Mark PTO Complete",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"PTO_COMPLETE\",\n  \"completedAt\": \"2023-06-13T19:42:03.050Z\" // defaults to today if not supplied\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{devapi-baseurl-v2}}/loans/:loanId/milestones",
+							"host": [
+								"{{devapi-baseurl-v2}}"
+							],
+							"path": [
+								"loans",
+								":loanId",
+								"milestones"
+							],
+							"variable": [
+								{
+									"key": "loanId",
+									"value": "{{devapi-currentloanid}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Toolbox - Sandbox Only",
+			"item": [
+				{
+					"name": "Clear Stipulations in Sandbox",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"what\": \"STIPULATIONS\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{devapi-toolbox-baseurl-v2}}/loans/:loanId/clear",
+							"host": [
+								"{{devapi-toolbox-baseurl-v2}}"
+							],
+							"path": [
+								"loans",
+								":loanId",
+								"clear"
+							],
+							"query": [
+								{
+									"key": "current",
+									"value": "true",
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "loanId",
+									"value": "{{devapi-currentloanid}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Clear Contract Review in Sandbox",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"what\": \"CONTRACT_REVIEW\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{devapi-toolbox-baseurl-v2}}/loans/:loanId/clear",
+							"host": [
+								"{{devapi-toolbox-baseurl-v2}}"
+							],
+							"path": [
+								"loans",
+								":loanId",
+								"clear"
+							],
+							"query": [
+								{
+									"key": "current",
+									"value": "true",
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "loanId",
+									"value": "{{devapi-currentloanid}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "basic",
+		"basic": [
+			{
+				"key": "password",
+				"value": "{{devapi-orgkey}}",
+				"type": "string"
+			},
+			{
+				"key": "username",
+				"value": "{{devapi-orgid}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

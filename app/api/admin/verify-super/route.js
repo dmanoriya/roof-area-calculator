@@ -15,7 +15,7 @@ function getApiKey() {
   } catch (err) {
     console.error('Error reading settings for super admin:', err);
   }
-  return process.env.GOOGLE_MAPS_API_KEY || 'AIzaSyDbQLFiIpLz8w3ZXYaC7BKA7YlUiBCFzPA';
+  return process.env.GOOGLE_MAPS_API_KEY || 'AIzaSyAusNwdN9zPqXJ_doW_M4mbdrhtJkZkdpU';
 }
 
 export async function POST(req) {

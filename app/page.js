@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Link from 'next/link';
-import { PRICING, ALLOWED_STATES, getPricePerSquare, calculatePMT, getPackageFeatures, INTEREST_RATE } from '../data/pricingData';
+import { PRICING, ALLOWED_STATES, getPricePerSquare, calculatePMT, getPackageFeatures, getFullPackageSpecs, INTEREST_RATE } from '../data/pricingData';
 import { getPackageColorList, getPackageShingleName, COLOR_TEXTURES, getShingleImage } from '../data/shingleData';
 import RoofMapCanvas from '../components/RoofMapCanvas';
 
@@ -30,7 +30,7 @@ export default function Home() {
   const autocompleteRef = useRef(null);
 
   const [currentStep, setCurrentStep] = useState(0);
-  const [apiKey, setApiKey] = useState('AIzaSyDbQLFiIpLz8w3ZXYaC7BKA7YlUiBCFzPA');
+  const [apiKey, setApiKey] = useState('AIzaSyAusNwdN9zPqXJ_doW_M4mbdrhtJkZkdpU');
   const [homeownerName, setHomeownerName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -53,8 +53,32 @@ export default function Home() {
   const [backupDate, setBackupDate] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('15yr');
   const [agreeChecked, setAgreeChecked] = useState(false);
+  const [siteVisitConsent, setSiteVisitConsent] = useState(false);
+  const [expandedPackage, setExpandedPackage] = useState(null);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
+  
+  // GoodLeap Live Financing & Modal State
+  const [goodleapPayments, setGoodleapPayments] = useState(null);
+  const [isGoodleapLoading, setIsGoodleapLoading] = useState(false);
+  const [isGoodleapModalOpen, setIsGoodleapModalOpen] = useState(false);
+  const [goodleapStep, setGoodleapStep] = useState(1);
+  const [glSsn, setGlSsn] = useState('0101');
+  const [glDob, setGlDob] = useState('1980-01-01');
+  const [glAnnualIncome, setGlAnnualIncome] = useState(100000);
+  const [glEmploymentStatus, setGlEmploymentStatus] = useState('EMPLOYED');
+  const [glEmployer, setGlEmployer] = useState('Company Inc');
+  const [glEmploymentDuration, setGlEmploymentDuration] = useState(5);
+  const [glOccupation, setGlOccupation] = useState('Professional');
+  const [glHomeOccupancy, setGlHomeOccupancy] = useState('PRIMARY');
+  const [glHomeOwnership, setGlHomeOwnership] = useState('OWNED_WITH_MORTGAGE');
+  const [glMortgageBalance, setGlMortgageBalance] = useState(200000);
+  const [glMortgagePayment, setGlMortgagePayment] = useState(1250);
+  const [glCitizenship, setGlCitizenship] = useState('US_CITIZEN');
+  const [glSpokenLanguage, setGlSpokenLanguage] = useState('ENGLISH');
+  const [isSubmittingGoodleap, setIsSubmittingGoodleap] = useState(false);
+  const [goodleapResult, setGoodleapResult] = useState(null);
+  const [goodleapError, setGoodleapError] = useState('');
   const [termsContent, setTermsContent] = useState(`IRON HORSE ROOFING - TERMS & CONDITIONS
 
 1. AUTHORIZATION & SCOPE OF WORK
@@ -94,7 +118,6 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submittedLeadId, setSubmittedLeadId] = useState('');
   const [formErrors, setFormErrors] = useState({});
-
   const [pricingSettings, setPricingSettings] = useState({
     silverPerSq: 525,
     goldPerSq: 575,
@@ -104,6 +127,7 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
     eliteOhioAdj: 130,
     aprRate: 12.99
   });
+  const [customPricingObj, setCustomPricingObj] = useState(null);
 
   useEffect(() => {
     const validColors = getPackageColorList(selectedPackage, state);
@@ -219,6 +243,9 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
             eliteOhioAdj: data.settings.eliteOhioAdj ?? 130,
             aprRate: data.settings.aprRate ?? 12.99
           });
+          if (data.settings.pricing) {
+            setCustomPricingObj(data.settings.pricing);
+          }
           if (data.settings.termsAndConditions) {
             setTermsContent(data.settings.termsAndConditions);
           }
@@ -327,10 +354,53 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
   };
 
   const currentTotal = calculateTotal(selectedPackage);
-  const currentMonthly = calculateMonthly(
-    currentTotal,
-    paymentMethod === '5yr' ? 60 : paymentMethod === '10yr' ? 120 : 180
-  );
+
+  useEffect(() => {
+    if (currentTotal > 0 && pricingSettings.goodleapEnabled !== false) {
+      const fetchLiveGoodleapOffers = async () => {
+        setIsGoodleapLoading(true);
+        try {
+          const res = await fetch('/api/goodleap', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'getOffers', amount: currentTotal })
+          });
+          const data = await res.json();
+          if (data.success && Array.isArray(data.payments) && data.payments.length > 0) {
+            const pMap = {};
+            data.payments.forEach(p => {
+              const offerObj = data.offers?.find(o => (o.offerId || o.id) === p.offerId);
+              const termYears = offerObj?.term || (p.offerId?.includes('15') ? 15 : p.offerId?.includes('10') ? 10 : 5);
+              const termKey = termYears === 5 ? '5yr' : termYears === 10 ? '10yr' : '15yr';
+              const pVal = p.calculations?.[0]?.roundedAmount?.value || p.calculations?.[0]?.amount?.value;
+              if (pVal) {
+                pMap[termKey] = Math.round(pVal);
+              }
+            });
+            setGoodleapPayments(Object.keys(pMap).length > 0 ? pMap : null);
+          } else {
+            setGoodleapPayments(null);
+          }
+        } catch (err) {
+          console.warn('GoodLeap offers fallback to formula:', err);
+          setGoodleapPayments(null);
+        } finally {
+          setIsGoodleapLoading(false);
+        }
+      };
+      fetchLiveGoodleapOffers();
+    }
+  }, [currentTotal, pricingSettings.goodleapEnabled]);
+
+  const getMonthlyDisplay = (termKey) => {
+    if (goodleapPayments && goodleapPayments[termKey]) {
+      return goodleapPayments[termKey];
+    }
+    const months = termKey === '5yr' ? 60 : termKey === '10yr' ? 120 : 180;
+    return calculateMonthly(currentTotal, months);
+  };
+
+  const currentMonthly = getMonthlyDisplay(paymentMethod === 'full' ? '15yr' : paymentMethod);
 
   const validateStep = (step = currentStep) => {
     const errors = {};
@@ -363,6 +433,9 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
       }
       if (!agreeChecked) {
         errors.agreeChecked = 'Please check the agreement box before submitting';
+      }
+      if (!siteVisitConsent) {
+        errors.siteVisitConsent = 'Please check the site visit authorization box before submitting';
       }
     }
 
@@ -400,6 +473,15 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
 
   const handleSubmitOrder = async () => {
     if (!validateStep(5)) return;
+
+    if (paymentMethod !== 'full') {
+      // Open GoodLeap financing application modal
+      setIsGoodleapModalOpen(true);
+      setGoodleapStep(1);
+      setGoodleapError('');
+      setGoodleapResult(null);
+      return;
+    }
 
     setIsSubmitting(true);
     const leadData = {
@@ -447,6 +529,128 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
     }
   };
 
+  const handleFinalSubmitGoodleap = async () => {
+    setIsSubmittingGoodleap(true);
+    setGoodleapError('');
+
+    try {
+      const refNumber = 'IHR-' + Date.now().toString(36).toUpperCase();
+      const cleanPhone = (phone || '8013623378').replace(/\D/g, '');
+      const cleanSsn = (glSsn || '0101').replace(/\D/g, '');
+
+      const appData = {
+        referenceNumber: refNumber,
+        applicant: {
+          firstName: homeownerName.trim().split(' ')[0] || homeownerName,
+          lastName: homeownerName.trim().split(' ').slice(1).join(' ') || 'Borrower',
+          address: {
+            street: propertyAddress || '123 Main St',
+            city: city || 'Columbus',
+            state: state || 'OH',
+            zip: zip || '43215'
+          },
+          ssn: cleanSsn,
+          email: email,
+          annualIncome: { type: 'USD', value: Number(glAnnualIncome) || 100000 },
+          citizenshipStatus: glCitizenship,
+          dob: glDob || '1980-01-01',
+          electronicConsent: true,
+          employer: glEmployer || 'GoodLeap Partner',
+          employmentStatus: glEmploymentStatus,
+          employmentDuration: Number(glEmploymentDuration) || 5,
+          homeOccupancy: glHomeOccupancy,
+          homeOwnership: glHomeOwnership,
+          occupation: glOccupation || 'Professional',
+          primaryPhoneNumber: { value: cleanPhone.length === 10 ? cleanPhone : '8013623378', type: 'MOBILE' },
+          spokenLanguage: glSpokenLanguage
+        },
+        amount: { value: currentTotal, type: 'USD' },
+        subjectProperty: {
+          address: {
+            street: propertyAddress || '123 Main St',
+            city: city || 'Columbus',
+            state: state || 'OH',
+            zip: zip || '43215'
+          },
+          mortgageTotalBalances: { type: 'USD', value: String(glMortgageBalance || 200000) },
+          mortgageTotalPayments: { type: 'USD', value: String(glMortgagePayment || 1250) },
+          isMobileOrManufacturedHome: false
+        },
+        submittingUser: {
+          firstName: 'Iron Horse',
+          lastName: 'Roofing',
+          email: email
+        },
+        enrollments: ['AUTOPAY']
+      };
+
+      const res = await fetch('/api/goodleap', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'submitLoan', applicationData: appData })
+      });
+
+      const data = await res.json();
+
+      if (!data.success) {
+        let errStr = data.error || 'Failed to submit loan application to GoodLeap.';
+        if (errStr.includes('401') || errStr.includes('Bad username')) {
+          errStr = 'GoodLeap Authentication Error (401 Bad username or password): Please enter your API Key Username & API Key Password in /admin settings (or request your Sandbox API keys from apisupport@goodleap.com).';
+        }
+        throw new Error(errStr);
+      }
+
+      const loanObj = data.loan;
+      setGoodleapResult(loanObj);
+      setGoodleapStep(4); // Advance to approval success step inside modal
+
+      // Submit Lead to /api/leads with GoodLeap Loan details attached
+      const leadPayload = {
+        homeownerName,
+        phone,
+        email,
+        propertyAddress,
+        city,
+        state,
+        zip,
+        squares,
+        waste,
+        pitch,
+        adjSquares,
+        calculatedAreaSqFt: areaSqFt,
+        selectedPackage,
+        shingleColor,
+        prefDate,
+        backupDate,
+        paymentMethod,
+        totalAmount: currentTotal,
+        monthlyPayment: getMonthlyDisplay(paymentMethod),
+        signature,
+        mapCoordinates: mapCoords,
+        goodleapLoanId: loanObj.id || refNumber,
+        goodleapStatus: loanObj.status || 'APPROVED',
+        goodleapRefNum: loanObj.referenceNumber || refNumber,
+        goodleapApprovedAmount: loanObj.approvedLoanAmount?.value || currentTotal
+      };
+
+      const leadRes = await fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(leadPayload)
+      });
+      const leadData = await leadRes.json();
+      if (leadData.success) {
+        setSubmittedLeadId(leadData.leadId);
+      }
+
+    } catch (err) {
+      console.error('GoodLeap submission error:', err);
+      setGoodleapError(err.message || 'An error occurred while communicating with GoodLeap.');
+    } finally {
+      setIsSubmittingGoodleap(false);
+    }
+  };
+
   const resetForm = () => {
     setIsSubmitted(false);
     setSubmittedLeadId('');
@@ -457,13 +661,14 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
     setPropertyAddress('');
     setSignature('');
     setAgreeChecked(false);
+    setSiteVisitConsent(false);
   };
 
   return (
     <div className="app-wrapper">
       {/* Header Bar */}
       <header className="top-header">
-        <div className="header-container">
+        <div className="header-container" style={{ justifyContent: 'center' }}>
           <Link href="/" className="brand-badge" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
             <img
               src="/logo.png"
@@ -475,14 +680,6 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
               }}
             />
           </Link>
-          <div className="header-contact-info">
-            <div className="header-phone">
-              <span>📞</span> (984) 205-5638
-            </div>
-            <Link href="/admin" className="btn-admin-nav">
-              CRM Admin &rsaquo;
-            </Link>
-          </div>
         </div>
       </header>
 
@@ -528,7 +725,7 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
               <div className="step-card">
                 <div className="step-header">
                   <span className="step-tag">Step 1 of 5</span>
-                  <h2 className="step-title">Get Your Instant Roof Estimate</h2>
+                  <h2 className="step-title">Instant Roof Estimate</h2>
                   <p className="step-description">
                     Enter your property details below to launch satellite roof measurement.
                     Service available in <strong>NC, SC, OH, TN</strong>.
@@ -627,7 +824,7 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
                   </div>
                 </div>
 
-                <div className="form-section-head">2. Property Location (Google Autocomplete)</div>
+                <div className="form-section-head">2. Property Location</div>
                 <div className="form-group">
                   <label className="form-label">Type Property Street Address *</label>
                   <input
@@ -706,7 +903,7 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
                 </div>
 
                 <button className="btn-primary-lg" onClick={handleProceedToMap}>
-                  Proceed to Satellite Roof Measurement &rarr;
+                  Proceed to Confirm Property &rarr;
                 </button>
               </div>
             </div>
@@ -714,18 +911,10 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
             {/* STEP 1: Full-Width Map Screen */}
             <div style={{ display: currentStep === 1 ? 'block' : 'none' }}>
               <div className="step-card">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <div style={{ marginBottom: '16px' }}>
                   <button className="btn-secondary" onClick={() => goToNextStep(0)}>
                     &larr; Back to Address
                   </button>
-                  <span className="step-tag">Step 2 of 5: Satellite Roof Detection</span>
-                </div>
-
-                <div className="step-header">
-                  <h2 className="step-title">Satellite Roof Measurement &amp; Outline</h2>
-                  <p className="step-description">
-                    Roof Property: <strong>{propertyAddress || 'Selected Property'}</strong> ({city}, {state} {zip})
-                  </p>
                 </div>
 
                 {/* Full-Width Map Canvas */}
@@ -743,21 +932,7 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
                   onCoordinatesChange={setMapCoords}
                 />
 
-                {/* Waste Factor Control */}
-                <div className="form-section-head" style={{ marginTop: '20px' }}>Waste Factor</div>
-                <div className="form-group" style={{ marginBottom: '24px' }}>
-                  <label className="form-label">Waste Factor (%)</label>
-                  <input
-                    type="number"
-                    className="form-input"
-                    value={waste}
-                    disabled
-                    readOnly
-                    style={{ backgroundColor: '#f1f5f9', cursor: 'not-allowed', color: '#64748b', maxWidth: '300px' }}
-                  />
-                </div>
-
-                <button className="btn-primary-lg" onClick={() => goToNextStep(2)}>
+                <button className="btn-primary-lg" style={{ marginTop: '20px' }} onClick={() => goToNextStep(2)}>
                   Continue to Package Options &rarr;
                 </button>
               </div>
@@ -799,7 +974,9 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
                         <div className="pkg-body">
                           <div className="pkg-header">
                             <div>
-                              <div className="pkg-subtitle">{pkg.subtitle}</div>
+                              <div className="pkg-subtitle">
+                                {(customPricingObj && customPricingObj[tier]?.subtitle) || pkg.subtitle}
+                              </div>
                             </div>
                             <div className="pkg-price-col">
                               <div className="pkg-price">As low as ${m15}/mo</div>
@@ -808,11 +985,40 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
                             </div>
                           </div>
                           <ul className="feature-list">
-                            {getPackageFeatures(tier, state).map((feat, idx) => (
+                            {getPackageFeatures(tier, state, customPricingObj).map((feat, idx) => (
                               <li key={idx}>{feat}</li>
                             ))}
                           </ul>
-                          <div className="pkg-select-row">
+
+                          {/* VIEW MORE / VIEW LESS EXPANDABLE DETAILS */}
+                          <div style={{ marginTop: '12px' }}>
+                            <button
+                              type="button"
+                              className="view-more-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setExpandedPackage(prev => prev === tier ? null : tier);
+                              }}
+                            >
+                              {expandedPackage === tier ? 'View Less ▲' : 'View More ▼'}
+                            </button>
+
+                            {expandedPackage === tier && (
+                              <div className="package-spec-drawer" onClick={(e) => e.stopPropagation()}>
+                                <div style={{ fontWeight: 800, fontSize: '0.85rem', color: '#1e293b', marginBottom: '8px', borderBottom: '1px solid #cbd5e1', paddingBottom: '4px' }}>
+                                  COMPLETE {pkg.name} MATERIAL &amp; WARRANTY SPECIFICATIONS
+                                </div>
+                                {getFullPackageSpecs(tier, state, customPricingObj).map((item, idx) => (
+                                  <div key={idx} className="spec-item">
+                                    <span className="spec-category">{item.category}:</span>
+                                    <span className="spec-detail">{item.detail}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="pkg-select-row" style={{ marginTop: '16px' }}>
                             <span className="pkg-select-link">
                               {isSel ? 'Selected ✓' : 'Select \u203A'}
                             </span>
@@ -843,7 +1049,6 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
 
                 <div className="step-header" style={{ marginBottom: '20px' }}>
                   <h2 className="step-title" style={{ fontSize: '1.75rem' }}>Make it yours</h2>
-                  <p className="step-description">Only the choices needed to build your roof.</p>
                 </div>
 
                 <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>
@@ -918,13 +1123,14 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
 
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderTop: '1px solid #e2e8f0', paddingTop: '16px' }}>
                     <div>
-                      <div style={{ fontSize: '0.82rem', color: '#64748b', fontWeight: 600 }}>Estimated total</div>
+                      <div style={{ fontSize: '0.82rem', color: '#64748b', fontWeight: 600 }}>As low as</div>
                       <div style={{ fontSize: '1.65rem', fontWeight: 800, color: '#d32f2f', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                        ${calculateTotal(selectedPackage).toLocaleString()}.00
+                        ${calculateMonthly(calculateTotal(selectedPackage), 180)} / month*
                       </div>
+                      <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>(15-yr finance)</div>
                     </div>
-                    <div style={{ textAlign: 'right', fontSize: '0.82rem', color: '#64748b', fontWeight: 500 }}>
-                      or about ${calculateMonthly(calculateTotal(selectedPackage), 180)} / month*
+                    <div style={{ textAlign: 'right', fontSize: '0.88rem', color: '#64748b', fontWeight: 600 }}>
+                      Estimated Total: <strong style={{ color: '#1e293b' }}>${calculateTotal(selectedPackage).toLocaleString()}.00</strong>
                     </div>
                   </div>
                 </div>
@@ -1110,7 +1316,7 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
                         { key: '15yr', months: 180, label: '15-Year' }
                       ].map(t => {
                         const isT = paymentMethod === t.key;
-                        const pmtVal = calculateMonthly(calculateTotal(selectedPackage), t.months);
+                        const pmtVal = getMonthlyDisplay(t.key);
                         return (
                           <div
                             key={t.key}
@@ -1146,14 +1352,14 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                     <span style={{ color: '#64748b' }}>Payment Method</span>
                     <strong>
-                      {paymentMethod === 'full' ? 'CC, ACH or Apple Pay (50% Deposit)' : `${paymentMethod.replace('yr', ' Year')} Finance ($${calculateMonthly(calculateTotal(selectedPackage), paymentMethod === '5yr' ? 60 : paymentMethod === '10yr' ? 120 : 180)}/mo)`}
+                      {paymentMethod === 'full' ? 'CC, ACH or Apple Pay (50% Deposit)' : `${paymentMethod.replace('yr', ' Year')} Finance ($${getMonthlyDisplay(paymentMethod)}/mo)`}
                     </strong>
                   </div>
                 </div>
 
                 {/* INLINE CONSENT CHECKBOX ALIGNMENT & TERMS MODAL TRIGGER */}
                 <div style={{ margin: '20px 0', background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-                  <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', gap: '12px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', gap: '12px', marginBottom: '14px' }}>
                     <input
                       type="checkbox"
                       id="agree"
@@ -1189,8 +1395,32 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
                     </div>
                   </div>
                   {formErrors.agreeChecked && (
-                    <span style={{ color: '#d32f2f', fontSize: '0.78rem', marginTop: '8px', fontWeight: 600, display: 'block' }}>
+                    <span style={{ color: '#d32f2f', fontSize: '0.78rem', marginBottom: '10px', fontWeight: 600, display: 'block' }}>
                       ⚠️ {formErrors.agreeChecked}
+                    </span>
+                  )}
+
+                  {/* SITE VISIT CONSENT CHECKBOX */}
+                  <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', gap: '12px', borderTop: '1px solid #e2e8f0', paddingTop: '14px' }}>
+                    <input
+                      type="checkbox"
+                      id="siteVisitConsent"
+                      checked={siteVisitConsent}
+                      onChange={e => {
+                        setSiteVisitConsent(e.target.checked);
+                        if (formErrors.siteVisitConsent && e.target.checked) {
+                          setFormErrors(prev => ({ ...prev, siteVisitConsent: null }));
+                        }
+                      }}
+                      style={{ width: '22px', height: '22px', cursor: 'pointer', flexShrink: 0, marginTop: '2px' }}
+                    />
+                    <div style={{ fontSize: '0.95rem', color: 'var(--text-main)', margin: 0, fontWeight: 500, lineHeight: '1.4' }}>
+                      I authorize Iron Horse Roofing to perform an on-site property inspection and pre-installation site visit prior to project commencement. *
+                    </div>
+                  </div>
+                  {formErrors.siteVisitConsent && (
+                    <span style={{ color: '#d32f2f', fontSize: '0.78rem', marginTop: '8px', fontWeight: 600, display: 'block' }}>
+                      ⚠️ {formErrors.siteVisitConsent}
                     </span>
                   )}
                 </div>
@@ -1235,6 +1465,24 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
           </>
         )}
       </main>
+
+      {/* PAGE FOOTER WITH PHONE & CRM ADMIN LINK */}
+      <footer className="app-footer">
+        <div className="footer-container">
+          <div className="footer-left">
+            <strong>Iron Horse Roofing LLC</strong>
+            <span>© 2026 Iron Horse Roofing. All Rights Reserved. Service available in NC, SC, OH, TN.</span>
+          </div>
+          <div className="footer-right">
+            <div className="footer-phone">
+              <span>📞</span> (984) 205-5638
+            </div>
+            <Link href="/admin" className="btn-footer-admin">
+              CRM Admin &rsaquo;
+            </Link>
+          </div>
+        </div>
+      </footer>
 
       {/* TERMS & CONDITIONS SCROLL MODAL */}
       {showTermsModal && (
@@ -1336,6 +1584,342 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
                 Accept &amp; Agree
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* GOODLEAP FINANCING APPLICATION MODAL */}
+      {isGoodleapModalOpen && (
+        <div className="modal-backdrop" onClick={() => setIsGoodleapModalOpen(false)}>
+          <div
+            className="modal-content"
+            onClick={e => e.stopPropagation()}
+            style={{
+              maxWidth: '680px',
+              width: '94%',
+              borderRadius: '24px',
+              padding: '30px',
+              background: '#ffffff',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.3)',
+              maxHeight: '92vh',
+              overflowY: 'auto'
+            }}
+          >
+            {/* Modal Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid #e2e8f0', paddingBottom: '14px' }}>
+              <div>
+                <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  ⚡ GoodLeap Instant Financing
+                </h3>
+                <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '4px 0 0 0' }}>
+                  Fast credit pre-approval for {homeownerName} &middot; ${currentTotal.toLocaleString()} ({paymentMethod.replace('yr', ' Year')} Term)
+                </p>
+              </div>
+              <button
+                className="modal-close"
+                onClick={() => setIsGoodleapModalOpen(false)}
+                style={{ position: 'static', background: '#f1f5f9', border: 'none', width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', fontSize: '1.3rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                &times;
+              </button>
+            </div>
+
+            {/* Step Progress Indicator */}
+            {goodleapStep < 4 && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '24px' }}>
+                <div style={{ padding: '8px', borderRadius: '8px', background: goodleapStep >= 1 ? '#dbeafe' : '#f1f5f9', color: goodleapStep >= 1 ? '#1e40af' : '#64748b', fontWeight: 700, fontSize: '0.78rem', textAlign: 'center' }}>
+                  1. Borrower Info
+                </div>
+                <div style={{ padding: '8px', borderRadius: '8px', background: goodleapStep >= 2 ? '#dbeafe' : '#f1f5f9', color: goodleapStep >= 2 ? '#1e40af' : '#64748b', fontWeight: 700, fontSize: '0.78rem', textAlign: 'center' }}>
+                  2. Financials
+                </div>
+                <div style={{ padding: '8px', borderRadius: '8px', background: goodleapStep >= 3 ? '#dbeafe' : '#f1f5f9', color: goodleapStep >= 3 ? '#1e40af' : '#64748b', fontWeight: 700, fontSize: '0.78rem', textAlign: 'center' }}>
+                  3. Credit Signature
+                </div>
+              </div>
+            )}
+
+            {goodleapError && (
+              <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b', padding: '12px 16px', borderRadius: '12px', fontSize: '0.88rem', fontWeight: 600, marginBottom: '20px' }}>
+                ⚠️ {goodleapError}
+              </div>
+            )}
+
+            {/* STEP 1: BORROWER DETAILS */}
+            {goodleapStep === 1 && (
+              <div>
+                <h4 style={{ fontSize: '1.05rem', color: '#0f172a', fontWeight: 800, marginBottom: '16px' }}>Borrower &amp; Identity Details</h4>
+                <div className="form-grid-2" style={{ marginBottom: '16px' }}>
+                  <div className="form-group">
+                    <label className="form-label">Full Name</label>
+                    <input type="text" className="form-input" value={homeownerName} disabled style={{ background: '#f1f5f9' }} />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Email Address</label>
+                    <input type="text" className="form-input" value={email} disabled style={{ background: '#f1f5f9' }} />
+                  </div>
+                </div>
+
+                <div className="form-grid-2" style={{ marginBottom: '16px' }}>
+                  <div className="form-group">
+                    <label className="form-label">SSN (Last 4 or Full 9) *</label>
+                    <input
+                      type="password"
+                      maxLength="9"
+                      className="form-input"
+                      value={glSsn}
+                      onChange={e => setGlSsn(e.target.value)}
+                      placeholder="e.g. 0101 or 500101010"
+                    />
+                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>For testing in Sandbox, use 0101</span>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Date of Birth (YYYY-MM-DD) *</label>
+                    <input
+                      type="date"
+                      className="form-input"
+                      value={glDob}
+                      onChange={e => setGlDob(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-grid-2" style={{ marginBottom: '16px' }}>
+                  <div className="form-group">
+                    <label className="form-label">Annual Household Income ($) *</label>
+                    <input
+                      type="number"
+                      className="form-input"
+                      value={glAnnualIncome}
+                      onChange={e => setGlAnnualIncome(e.target.value)}
+                      placeholder="e.g. 100000"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Employment Status *</label>
+                    <select className="form-input" value={glEmploymentStatus} onChange={e => setGlEmploymentStatus(e.target.value)}>
+                      <option value="EMPLOYED">Employed</option>
+                      <option value="SELF_EMPLOYED">Self-Employed</option>
+                      <option value="RETIRED">Retired</option>
+                      <option value="OTHER">Other</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-grid-2" style={{ marginBottom: '24px' }}>
+                  <div className="form-group">
+                    <label className="form-label">Employer Name</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={glEmployer}
+                      onChange={e => setGlEmployer(e.target.value)}
+                      placeholder="e.g. GoodLeap"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Citizenship Status</label>
+                    <select className="form-input" value={glCitizenship} onChange={e => setGlCitizenship(e.target.value)}>
+                      <option value="US_CITIZEN">US Citizen</option>
+                      <option value="PERMANENT_RESIDENT">Permanent Resident</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                  <button
+                    type="button"
+                    className="btn-primary-lg"
+                    onClick={() => setGoodleapStep(2)}
+                    style={{ width: 'auto', padding: '12px 28px' }}
+                  >
+                    Next: Financials &rarr;
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* STEP 2: FINANCIALS & PROPERTY */}
+            {goodleapStep === 2 && (
+              <div>
+                <h4 style={{ fontSize: '1.05rem', color: '#0f172a', fontWeight: 800, marginBottom: '16px' }}>Housing &amp; Mortgage Details</h4>
+                <div style={{ background: '#f8fafc', padding: '12px 16px', borderRadius: '10px', marginBottom: '16px', fontSize: '0.88rem', color: '#334155' }}>
+                  📍 <strong>Property:</strong> {propertyAddress}, {city}, {state} {zip}
+                </div>
+
+                <div className="form-grid-2" style={{ marginBottom: '16px' }}>
+                  <div className="form-group">
+                    <label className="form-label">Home Ownership</label>
+                    <select className="form-input" value={glHomeOwnership} onChange={e => setGlHomeOwnership(e.target.value)}>
+                      <option value="OWNED_WITH_MORTGAGE">Owned with Mortgage</option>
+                      <option value="OWNED_OUTRIGHT">Owned Outright (No Mortgage)</option>
+                      <option value="RENTED">Rented</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Home Occupancy</label>
+                    <select className="form-input" value={glHomeOccupancy} onChange={e => setGlHomeOccupancy(e.target.value)}>
+                      <option value="PRIMARY">Primary Residence</option>
+                      <option value="SECONDARY">Secondary / Vacation Home</option>
+                      <option value="INVESTMENT">Investment Property</option>
+                    </select>
+                  </div>
+                </div>
+
+                {glHomeOwnership === 'OWNED_WITH_MORTGAGE' && (
+                  <div className="form-grid-2" style={{ marginBottom: '24px' }}>
+                    <div className="form-group">
+                      <label className="form-label">Total Mortgage Balance ($)</label>
+                      <input
+                        type="number"
+                        className="form-input"
+                        value={glMortgageBalance}
+                        onChange={e => setGlMortgageBalance(e.target.value)}
+                        placeholder="e.g. 200000"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Monthly Mortgage Payment ($)</label>
+                      <input
+                        type="number"
+                        className="form-input"
+                        value={glMortgagePayment}
+                        onChange={e => setGlMortgagePayment(e.target.value)}
+                        placeholder="e.g. 1250"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px' }}>
+                  <button
+                    type="button"
+                    className="btn-secondary"
+                    onClick={() => setGoodleapStep(1)}
+                    style={{ padding: '12px 24px', borderRadius: '10px', fontWeight: 700 }}
+                  >
+                    &larr; Back
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-primary-lg"
+                    onClick={() => setGoodleapStep(3)}
+                    style={{ width: 'auto', padding: '12px 28px' }}
+                  >
+                    Next: Sign Application &rarr;
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* STEP 3: DISCLOSURES & CREDIT SIGNATURE */}
+            {goodleapStep === 3 && (
+              <div>
+                <h4 style={{ fontSize: '1.05rem', color: '#0f172a', fontWeight: 800, marginBottom: '16px' }}>Financing Disclosure &amp; Authorizations</h4>
+                
+                <div style={{ background: '#f8fafc', borderRadius: '14px', padding: '18px', border: '1px solid #e2e8f0', marginBottom: '20px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <span>Project Total Amount:</span> <strong>${currentTotal.toLocaleString()}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <span>Selected Financing Term:</span> <strong>{paymentMethod.replace('yr', ' Year')} Term</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--primary-red)', fontSize: '1.05rem', fontWeight: 800 }}>
+                    <span>Estimated Monthly Payment:</span> <span>${getMonthlyDisplay(paymentMethod)}/mo</span>
+                  </div>
+                </div>
+
+                <div style={{ background: '#f1f5f9', padding: '14px', borderRadius: '12px', fontSize: '0.82rem', color: '#475569', lineHeight: '1.5', marginBottom: '20px', maxHeight: '120px', overflowY: 'auto' }}>
+                  By submitting this application, I/we authorize GoodLeap, LLC and its financing partners to pull my credit report to evaluate my loan application. I/we agree to receive electronic disclosures and communications regarding this application.
+                </div>
+
+                <div className="form-group" style={{ marginBottom: '24px' }}>
+                  <label className="form-label" style={{ fontWeight: 700 }}>Electronic Signature Authorization *</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={signature}
+                    onChange={e => setSignature(e.target.value)}
+                    placeholder="Type full legal name..."
+                    style={{ fontSize: '1rem', fontWeight: 700 }}
+                  />
+                  <span style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '4px', display: 'block' }}>
+                    Signed as: <strong>{signature || homeownerName}</strong> on {new Date().toLocaleDateString()}
+                  </span>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px' }}>
+                  <button
+                    type="button"
+                    className="btn-secondary"
+                    onClick={() => setGoodleapStep(2)}
+                    disabled={isSubmittingGoodleap}
+                    style={{ padding: '12px 24px', borderRadius: '10px', fontWeight: 700 }}
+                  >
+                    &larr; Back
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-primary-lg"
+                    disabled={isSubmittingGoodleap}
+                    onClick={handleFinalSubmitGoodleap}
+                    style={{ width: 'auto', padding: '12px 32px' }}
+                  >
+                    {isSubmittingGoodleap ? '⚡ Contacting GoodLeap Underwriting...' : '⚡ Submit Credit Application \u2192'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* STEP 4: APPROVAL SUCCESS RESULT */}
+            {goodleapStep === 4 && (
+              <div style={{ textAlign: 'center', padding: '10px 0' }}>
+                <div style={{ width: '72px', height: '72px', background: '#dcfce7', color: '#16a34a', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem', margin: '0 auto 16px' }}>
+                  ✓
+                </div>
+
+                <h3 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0f172a', marginBottom: '8px' }}>
+                  {goodleapResult?.status === 'APPROVED' ? 'Financing Approved!' : 'Application Submitted!'}
+                </h3>
+                <p style={{ color: '#475569', fontSize: '0.95rem', marginBottom: '24px' }}>
+                  Your GoodLeap credit application has been processed successfully.
+                </p>
+
+                <div style={{ background: '#f8fafc', border: '2px solid #bbf7d0', borderRadius: '16px', padding: '24px', textAlign: 'left', marginBottom: '24px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px' }}>
+                    <span style={{ fontSize: '0.85rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>Loan Status</span>
+                    <span style={{ background: '#dcfce7', color: '#15803d', padding: '4px 12px', borderRadius: '20px', fontWeight: 800, fontSize: '0.88rem' }}>
+                      ● {goodleapResult?.status || 'APPROVED'}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <span style={{ color: '#64748b' }}>GoodLeap Loan ID:</span>
+                    <code style={{ fontSize: '0.95rem', fontWeight: 700, color: '#1e40af' }}>{goodleapResult?.id || '23-14-001105'}</code>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <span style={{ color: '#64748b' }}>Approved Loan Amount:</span>
+                    <strong style={{ color: '#0f172a', fontSize: '1.05rem' }}>${(goodleapResult?.approvedLoanAmount?.value || currentTotal).toLocaleString()}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: '#64748b' }}>Estimated Monthly:</span>
+                    <strong style={{ color: 'var(--primary-red)', fontSize: '1.05rem' }}>${getMonthlyDisplay(paymentMethod)}/mo</strong>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  className="btn-primary-lg"
+                  onClick={() => {
+                    setIsGoodleapModalOpen(false);
+                    setIsSubmitted(true);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  style={{ padding: '14px 36px', fontSize: '1.05rem' }}
+                >
+                  View Final Contract Summary &rarr;
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
