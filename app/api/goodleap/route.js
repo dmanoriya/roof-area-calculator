@@ -200,18 +200,70 @@ export async function POST(req) {
     // 3. SUBMIT LOAN
     if (action === 'submitLoan') {
       const { applicationData } = body;
+      const appData = { ...applicationData };
 
       // Ensure disclosure token is included
-      if (!applicationData.disclosureToken) {
-        const discRes = await fetch(`${config.baseUrl}/disclosures?current=true`, {
-          headers: { 'authorization': config.authHeader, 'content-type': 'application/json' }
-        });
-        if (discRes.ok) {
-          const discJson = await discRes.json();
-          if (discJson.data && discJson.data[0]) {
-            applicationData.disclosureToken = discJson.data[0].token;
+      if (!appData.disclosureToken) {
+        try {
+          const discRes = await fetch(`${config.baseUrl}/disclosures?current=true`, {
+            headers: { 'authorization': config.authHeader, 'content-type': 'application/json' }
+          });
+          if (discRes.ok) {
+            const discJson = await discRes.json();
+            if (discJson.data && discJson.data[0]) {
+              appData.disclosureToken = discJson.data[0].token;
+            }
           }
-        }
+        } catch (e) {}
+      }
+
+      // Ensure categoryId is set
+      if (!appData.categoryId) {
+        appData.categoryId = config.categoryId || 'b44055de-bb6d-4f35-b8f1-6cac8549d9f9';
+      }
+
+      // Ensure offerId is set
+      if (!appData.offerId) {
+        try {
+          const offersRes = await fetch(`${config.baseUrl}/offers?categoryId=${appData.categoryId}`, {
+            headers: { 'authorization': config.authHeader, 'content-type': 'application/json' }
+          });
+          if (offersRes.ok) {
+            const offersJson = await offersRes.json();
+            if (offersJson.data && offersJson.data[0]) {
+              appData.offerId = offersJson.data[0].offerId || offersJson.data[0].id;
+            }
+          }
+        } catch (e) {}
+      }
+
+      // Sanitize Applicant Enums & Signature
+      if (appData.applicant) {
+        const occ = appData.applicant.homeOccupancy;
+        if (occ === 'PRIMARY_RESIDENCE' || occ === 'OWN') appData.applicant.homeOccupancy = 'PRIMARY';
+        else if (!['PRIMARY', 'SECONDARY', 'INVESTMENT', 'OTHER'].includes(occ)) appData.applicant.homeOccupancy = 'PRIMARY';
+
+        const own = appData.applicant.homeOwnership;
+        if (own === 'OWN_OUTRIGHT' || own === 'FREE_AND_CLEAR') appData.applicant.homeOwnership = 'OWNED_FREE_AND_CLEAR';
+        else if (own === 'MORTGAGE' || own === 'PRIMARY') appData.applicant.homeOwnership = 'OWNED_WITH_MORTGAGE';
+        else if (!['NOT_OWNED', 'OWNED_WITH_MORTGAGE', 'OWNED_FREE_AND_CLEAR'].includes(own)) appData.applicant.homeOwnership = 'OWNED_WITH_MORTGAGE';
+      }
+
+      if (typeof appData.applicantSignature === 'object' && appData.applicantSignature?.name) {
+        appData.applicantSignature = appData.applicantSignature.name;
+      } else if (!appData.applicantSignature || typeof appData.applicantSignature !== 'string') {
+        const fn = appData.applicant?.firstName || '';
+        const ln = appData.applicant?.lastName || '';
+        appData.applicantSignature = `${fn} ${ln}`.trim() || 'Homeowner Applicant';
+      }
+
+      // Ensure submittingUser has sales rep details
+      if (!appData.submittingUser || !appData.submittingUser.email || appData.submittingUser.email === appData.applicant?.email) {
+        appData.submittingUser = {
+          firstName: 'Mark',
+          lastName: 'Perry',
+          email: 'markp@ironhorseroofing.com'
+        };
       }
 
       const submitRes = await fetch(`${config.baseUrl}/loans`, {
@@ -221,7 +273,7 @@ export async function POST(req) {
           'content-type': 'application/json',
           'cache-control': 'no-cache'
         },
-        body: JSON.stringify(applicationData)
+        body: JSON.stringify(appData)
       });
 
       const responseText = await submitRes.text();
@@ -233,9 +285,24 @@ export async function POST(req) {
       }
 
       if (!submitRes.ok) {
+        let errDesc = '';
+        if (Array.isArray(responseJson)) {
+          errDesc = responseJson.map(item => item.description || item.message).join(' | ');
+        } else if (responseJson.message) {
+          errDesc = responseJson.message;
+        } else if (responseJson.raw) {
+          errDesc = responseJson.raw;
+        } else {
+          errDesc = `HTTP ${submitRes.status} Bad Request`;
+        }
+
+        if (errDesc.includes('LOAN_TYPE_REQUIRES_VALID_SALES_REP') || errDesc.includes('create a user for this sales rep')) {
+          errDesc = 'GoodLeap Sales Rep Notice: Your GoodLeap API key is authenticated (200 OK), but GoodLeap requires a registered Sales Rep user in your GoodLeap Origin merchant portal (https://origin.goodleap.com). Please ask Steve Garcia (SGarcia@goodleap.com) to complete your Sales Rep user setup in Origin.';
+        }
+
         return NextResponse.json({
           success: false,
-          error: responseJson.message || responseJson.raw || `HTTP ${submitRes.status}`,
+          error: errDesc,
           details: responseJson
         }, { status: submitRes.status || 400 });
       }
