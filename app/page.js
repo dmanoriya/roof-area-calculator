@@ -593,11 +593,8 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
       const data = await res.json();
 
       if (!data.success) {
-        let errStr = data.error || 'Failed to submit loan application to GoodLeap.';
-        if (errStr.includes('401') || errStr.includes('Bad username')) {
-          errStr = 'GoodLeap Authentication Error (401 Bad username or password): Please enter your API Key Username & API Key Password in /admin settings (or request your Sandbox API keys from apisupport@goodleap.com).';
-        }
-        throw new Error(errStr);
+        const userMsg = data.error || 'We are currently unable to process financing applications online. Please choose a direct payment option or call us at (984) 205-5638.';
+        throw new Error(userMsg);
       }
 
       const loanObj = data.loan;

@@ -285,24 +285,24 @@ export async function POST(req) {
       }
 
       if (!submitRes.ok) {
-        let errDesc = '';
+        let rawErrDesc = '';
         if (Array.isArray(responseJson)) {
-          errDesc = responseJson.map(item => item.description || item.message).join(' | ');
+          rawErrDesc = responseJson.map(item => item.description || item.message).join(' | ');
         } else if (responseJson.message) {
-          errDesc = responseJson.message;
+          rawErrDesc = responseJson.message;
         } else if (responseJson.raw) {
-          errDesc = responseJson.raw;
+          rawErrDesc = responseJson.raw;
         } else {
-          errDesc = `HTTP ${submitRes.status} Bad Request`;
+          rawErrDesc = `HTTP ${submitRes.status} Bad Request`;
         }
 
-        if (errDesc.includes('LOAN_TYPE_REQUIRES_VALID_SALES_REP') || errDesc.includes('create a user for this sales rep')) {
-          errDesc = 'GoodLeap Sales Rep Notice: Your GoodLeap API key is authenticated (200 OK), but GoodLeap requires a registered Sales Rep user in your GoodLeap Origin merchant portal (https://origin.goodleap.com). Please ask Steve Garcia (SGarcia@goodleap.com) to complete your Sales Rep user setup in Origin.';
-        }
+        // Clean customer-facing error message (no technical codes, emails, or credentials exposed)
+        const userFriendlyError = 'We are currently unable to process financing applications online. Please choose a direct payment option (Credit Card, ACH, or Cash) or call us at (984) 205-5638 for immediate assistance.';
 
         return NextResponse.json({
           success: false,
-          error: errDesc,
+          error: userFriendlyError,
+          rawError: rawErrDesc,
           details: responseJson
         }, { status: submitRes.status || 400 });
       }
