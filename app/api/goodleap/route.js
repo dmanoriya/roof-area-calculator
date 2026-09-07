@@ -296,6 +296,8 @@ export async function POST(req) {
           rawErrDesc = `HTTP ${submitRes.status} Bad Request`;
         }
 
+        console.error('❌ [GoodLeap API Error]:', rawErrDesc, responseJson);
+
         // Clean customer-facing error message (no technical codes, emails, or credentials exposed)
         const userFriendlyError = 'We are currently unable to process financing applications online. Please choose a direct payment option (Credit Card, ACH, or Cash) or call us at (984) 205-5638 for immediate assistance.';
 

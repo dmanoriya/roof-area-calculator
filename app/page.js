@@ -593,6 +593,7 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
       const data = await res.json();
 
       if (!data.success) {
+        console.error('❌ [GoodLeap API Developer Error]:', data.rawError || data.error, data.details || '');
         const userMsg = data.error || 'We are currently unable to process financing applications online. Please choose a direct payment option or call us at (984) 205-5638.';
         throw new Error(userMsg);
       }
