@@ -37,7 +37,10 @@ function getGoodleapConfig() {
     categoryId: settings.goodleapCategoryId || '',
     promotionId: settings.goodleapPromotionId || '',
     orgId: settings.goodleapOrgId,
-    env: settings.goodleapEnv
+    env: settings.goodleapEnv,
+    salesFirstName: settings.goodleapSalesFirstName || 'Mark',
+    salesLastName: settings.goodleapSalesLastName || 'Perry',
+    salesEmail: settings.goodleapSalesEmail || 'markp@ironhorseroofing.com'
   };
 }
 
@@ -257,12 +260,12 @@ export async function POST(req) {
         appData.applicantSignature = `${fn} ${ln}`.trim() || 'Homeowner Applicant';
       }
 
-      // Ensure submittingUser has sales rep details
+      // Ensure submittingUser has sales rep details from settings
       if (!appData.submittingUser || !appData.submittingUser.email || appData.submittingUser.email === appData.applicant?.email) {
         appData.submittingUser = {
-          firstName: 'Mark',
-          lastName: 'Perry',
-          email: 'markp@ironhorseroofing.com'
+          firstName: config.salesFirstName || 'Mark',
+          lastName: config.salesLastName || 'Perry',
+          email: config.salesEmail || 'markp@ironhorseroofing.com'
         };
       }
 
