@@ -50,8 +50,8 @@ export default function AdminPage() {
   const [pkgEliteSpecsText, setPkgEliteSpecsText] = useState("Shingle System: Atlas Pinnacle® Pristine Architectural Shingles with Scotchgard™ Protector\nWarranty: LIFETIME Iron Horse Workmanship Warranty + Premium Manufacturer System Warranty\nUnderlayment: Commercial-Grade Heavyweight Synthetic Underlayment\nIce & Water Shield: Full Eave & Valley Ice & Water Shield Protection (Complete Perimeter Seal)\nDrip Edge & Metals: F8 Oversized Drip Edge Flashing for maximum water shed\nRidge & Ventilation: Atlas High-Performance Ridge Caps, Ridge Vents & Permaboots Pipe Flashing Seals\nDecking Replacement: Up to 5 OSB Sheeting Replacement Panels included free\nClean Up & Inspection: VIP Magnetic Yard & Flowerbed Sweep, Gutter Wash & Executive QC Inspection");
   const [goodleapEnabled, setGoodleapEnabled] = useState(true);
   const [goodleapEnv, setGoodleapEnv] = useState('sandbox');
-  const [goodleapOrgId, setGoodleapOrgId] = useState('loanpal');
-  const [goodleapOrgKey, setGoodleapOrgKey] = useState('Cle@nEnergy!');
+  const [goodleapOrgId, setGoodleapOrgId] = useState('93d706ec-36ca-4706-b937-b1cd7273f617');
+  const [goodleapOrgKey, setGoodleapOrgKey] = useState('c2ad30598be669dd77061046b5881b8f4bbed1a98ca16cd551afc2026c12f058');
   const [goodleapCategoryId, setGoodleapCategoryId] = useState('');
   const [goodleapPromotionId, setGoodleapPromotionId] = useState('');
   const [isTestingGoodleap, setIsTestingGoodleap] = useState(false);

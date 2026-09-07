@@ -9,8 +9,8 @@ function getGoodleapConfig() {
   let settings = {
     goodleapEnabled: true,
     goodleapEnv: 'sandbox',
-    goodleapOrgId: 'loanpal',
-    goodleapOrgKey: 'Cle@nEnergy!',
+    goodleapOrgId: '93d706ec-36ca-4706-b937-b1cd7273f617',
+    goodleapOrgKey: 'c2ad30598be669dd77061046b5881b8f4bbed1a98ca16cd551afc2026c12f058',
     goodleapCategoryId: '',
     goodleapPromotionId: ''
   };
