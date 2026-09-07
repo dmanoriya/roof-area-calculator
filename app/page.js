@@ -702,7 +702,7 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
                 <span>Property Address</span> <strong>{propertyAddress}, {city}, {state} {zip}</strong>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '10px' }}>
-                <span>Selected Package</span> <strong>{PRICING[selectedPackage].name} ({shingleColor})</strong>
+                <span>Selected Package</span> <strong>{PRICING[selectedPackage].name} Package (Color: {shingleColor})</strong>
               </div>
             </div>
 
@@ -1214,8 +1214,8 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
 
                 <div className="project-summary-box">
                   <div className="summary-row">
-                    <strong style={{ fontSize: '1.1rem', color: '#1e293b' }}>{PRICING[selectedPackage].name}</strong>
-                    <span style={{ fontSize: '0.95rem', color: '#475569', fontWeight: 600 }}>{shingleColor || 'Default'}</span>
+                    <strong style={{ fontSize: '1.1rem', color: '#1e293b' }}>{PRICING[selectedPackage].name} Package</strong>
+                    <span style={{ fontSize: '0.95rem', color: '#475569', fontWeight: 600 }}>Color: {shingleColor || 'Default'}</span>
                   </div>
                   <hr className="summary-divider" />
                   <div className="summary-row">
@@ -1342,7 +1342,7 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
                     <span style={{ color: '#64748b' }}>Property Address</span> <strong>{propertyAddress}, {city}, {state} {zip}</strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                    <span style={{ color: '#64748b' }}>Package &amp; Shingle Color</span> <strong>{PRICING[selectedPackage].name} ({shingleColor || 'Default'})</strong>
+                    <span style={{ color: '#64748b' }}>Package &amp; Shingle Color</span> <strong>{PRICING[selectedPackage].name} Package (Color: {shingleColor || 'Default'})</strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                     <span style={{ color: '#64748b' }}>Preferred Start Date</span> <strong>{prefDate || 'Not set'}</strong>
