@@ -54,6 +54,9 @@ export default function AdminPage() {
   const [goodleapOrgKey, setGoodleapOrgKey] = useState('c2ad30598be669dd77061046b5881b8f4bbed1a98ca16cd551afc2026c12f058');
   const [goodleapCategoryId, setGoodleapCategoryId] = useState('');
   const [goodleapPromotionId, setGoodleapPromotionId] = useState('');
+  const [goodleapSalesFirstName, setGoodleapSalesFirstName] = useState('Mark');
+  const [goodleapSalesLastName, setGoodleapSalesLastName] = useState('Perry');
+  const [goodleapSalesEmail, setGoodleapSalesEmail] = useState('markp@ironhorseroofing.com');
   const [isTestingGoodleap, setIsTestingGoodleap] = useState(false);
   const [goodleapTestResult, setGoodleapTestResult] = useState(null);
   const [termsContent, setTermsContent] = useState('');
@@ -181,6 +184,9 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
         setGoodleapOrgKey(data.settings.goodleapOrgKey || 'Cle@nEnergy!');
         setGoodleapCategoryId(data.settings.goodleapCategoryId || '');
         setGoodleapPromotionId(data.settings.goodleapPromotionId || '');
+        setGoodleapSalesFirstName(data.settings.goodleapSalesFirstName || 'Mark');
+        setGoodleapSalesLastName(data.settings.goodleapSalesLastName || 'Perry');
+        setGoodleapSalesEmail(data.settings.goodleapSalesEmail || 'markp@ironhorseroofing.com');
         if (data.settings.pricing) {
           const pr = data.settings.pricing;
           if (pr.Silver) {
@@ -253,6 +259,9 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
         goodleapOrgKey,
         goodleapCategoryId,
         goodleapPromotionId,
+        goodleapSalesFirstName,
+        goodleapSalesLastName,
+        goodleapSalesEmail,
         termsAndConditions: termsContent,
         pricing: {
           Silver: {
@@ -1011,6 +1020,48 @@ Orders cancelled after material dispatch or within 48 hours of scheduled install
                     value={aprRate}
                     onChange={e => setAprRate(e.target.value)}
                   />
+                </div>
+              </div>
+
+              <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px dashed #cbd5e1' }}>
+                <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#0f172a', marginBottom: '4px' }}>
+                  👤 Registered GoodLeap Sales Representative
+                </div>
+                <div style={{ fontSize: '0.78rem', color: '#64748b', marginBottom: '14px' }}>
+                  Enter the Sales Rep details registered in your <a href="https://origin.goodleap.com" target="_blank" rel="noreferrer" style={{ color: '#1e40af', fontWeight: 700 }}>GoodLeap Origin Merchant Portal</a>. All website financing applications will submit under this Sales Rep.
+                </div>
+
+                <div className="form-grid-3" style={{ marginBottom: '16px' }}>
+                  <div className="form-group">
+                    <label className="form-label">Sales Rep First Name</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={goodleapSalesFirstName}
+                      onChange={e => setGoodleapSalesFirstName(e.target.value)}
+                      placeholder="e.g. Mark"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Sales Rep Last Name</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={goodleapSalesLastName}
+                      onChange={e => setGoodleapSalesLastName(e.target.value)}
+                      placeholder="e.g. Perry"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Sales Rep Registered Email</label>
+                    <input
+                      type="email"
+                      className="form-input"
+                      value={goodleapSalesEmail}
+                      onChange={e => setGoodleapSalesEmail(e.target.value)}
+                      placeholder="e.g. markp@ironhorseroofing.com"
+                    />
+                  </div>
                 </div>
               </div>
 
